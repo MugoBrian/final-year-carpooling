@@ -23,7 +23,6 @@ import DriveRequest from "./components/main/DriveRequest/DriveRequest";
 import UseActiveTrip from "./libraries/UseActiveTrip";
 import Profile from "./components/profile/Profile";
 import Admin from "./components/admin/Admin";
-
 const libraries = ["places"];
 
 function App() {
@@ -31,8 +30,7 @@ function App() {
   const { token, name, setToken } = useToken(setActiveTrip);
 
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "AIzaSyCCZcb_AEAcCRk0uxe-GjAtUU_ewjpDXIM",
-    // googleMapsApiKey: "AIzaSyCAqdwRPpTtDGc6lWZKlSO0EPgkAKRo-8o",
+    googleMapsApiKey: "AIzaSyD8MSGXG-7y2nXRtE90sv2IeLCElO2e3i0",
     libraries,
   });
 

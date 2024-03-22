@@ -12,7 +12,7 @@ import * as MdIcons from "react-icons/md";
 import { Link } from "react-router-dom";
 import url from "../../../env";
 
-Geocode.setApiKey("AIzaSyCCZcb_AEAcCRk0uxe-GjAtUU_ewjpDXIM");
+Geocode.setApiKey("AIzaSyD8MSGXG-7y2nXRtE90sv2IeLCElO2e3i0");
 
 const mapContainerStyle = {
   height: "45vh",
@@ -23,7 +23,7 @@ const options = {
   zoomControl: true,
 };
 const center = {
-  lat: 0.6773,
+  lat: -0.6773283,
   lng: 34.7796,
 };
 
@@ -31,24 +31,25 @@ export default function RideRequest({ setToken, setActiveTrip }) {
   const [showModal, setShowModal] = useState(false);
   const [mapType, setMapType] = useState();
   const [modalTitle, setModalTitle] = useState("Title Error");
-  const [mapCoords, setMapCoords] = useState({
-    src: null,
-    dst: null,
-  });
   const [routeResp, setRouteResp] = useState();
-  const [rideRouteResp, setRideRouteResp] = useState({ reload: false });
+  const [finding, setFinding] = useState(true);
+  const [srcName, setsrcName] = useState("");
+  const [destName, setdestName] = useState("");
   const [rideTrip, setRideTrip] = useState();
   const [dateTime, setDateTime] = useState(
     new Date(new Date().getTime() + 60 * 60 * 1000)
   );
+
+  const [mapCoords, setMapCoords] = useState({
+    src: null,
+    dst: null,
+  });
+  const [rideRouteResp, setRideRouteResp] = useState({ reload: false });
   const [driver, setDriver] = useState([]);
   const [ride, setRide] = useState([]);
-  const [finding, setFinding] = useState(true);
-
-  const [srcName, setsrcName] = useState("");
-  const [destName, setdestName] = useState("");
 
   const [rideRequests, setRideRequests] = useState({ loading: true });
+  const [responseMessage, setResponseMessage] = useState();
 
   const mapRef = useRef();
   const onMapLoad = (map) => {
@@ -98,19 +99,29 @@ export default function RideRequest({ setToken, setActiveTrip }) {
 
   const directionsCallback = (response) => {
     if (response !== null) {
-      console.log(`directionsCallback`, response);
       if (response.status === "OK") setRouteResp(response);
-      else alert("Problem fetching directions");
-    } else alert("Problem fetching directions");
+      else
+        setResponseMessage(
+          `Error: Your Network connection is slow, Problem fetching Directions!`
+        );
+    } else
+      setResponseMessage(
+        `Error: Your Network connection is slow, Problem fetching Directions!`
+      );
   };
 
   const rideDirectionsCallback = (response) => {
-    console.log(`rideDirectionsCallback`, response);
     if (response !== null) {
       if (response.status === "OK")
         setRideRouteResp({ rideData: response, reload: false });
-      else alert("Problem fetching directions");
-    } else alert("Problem fetching directions");
+      else
+        setResponseMessage(
+          `Error: Your Network connection is slow, Problem fetching Directions!`
+        );
+    } else
+      setResponseMessage(
+        `Error: Your Network connection is slow, Problem fetching Directions!`
+      );
   };
 
   const handleRideClick = (ride) => (e) => {
@@ -129,11 +140,10 @@ export default function RideRequest({ setToken, setActiveTrip }) {
         throw new Error(response.statusText);
       })
       .then((responseJson) => {
-        console.log(`responseJson`, responseJson.user);
+        console.log("response user", responseJson.user);
         setDriver([responseJson.user]);
       })
       .catch((error) => {
-        console.log(error);
         alert(error);
         // window.location.reload();
       });
@@ -157,7 +167,6 @@ export default function RideRequest({ setToken, setActiveTrip }) {
     ) {
       waypoints.push({ location: mapCoords.dst, stopover: true });
     }
-    console.log(`waypoints`, waypoints);
     return waypoints;
   };
 
@@ -173,21 +182,18 @@ export default function RideRequest({ setToken, setActiveTrip }) {
       }),
     })
       .then((response) => {
-        console.log(`response`, response);
         if (response.ok) {
           return response.json();
         }
       })
       .then((responseJson) => {
-        console.log(`responseJson`, responseJson);
+        console.log(`Response from fetching requests`, responseJson);
         setRideRequests({
           rides: [...responseJson.rideRequests],
           loading: false,
         });
       })
-      .catch((error) => {
-        console.log(`error`, error);
-      });
+      .catch((error) => {});
   }, []);
 
   return (
@@ -225,17 +231,29 @@ export default function RideRequest({ setToken, setActiveTrip }) {
               />
             )}
           </GoogleMap>
+          {responseMessage && (
+            <Container
+              className={`rounded mb-4 mt-4 ${
+                responseMessage.startsWith("Error") ? "bg-danger" : "bg-success"
+              }`}
+            >
+              <p className="text-white py-2 text-center">{responseMessage}</p>
+            </Container>
+          )}
           <Container fluid="lg">
-            <Row style={{ marginTop: "3rem" }}>
+            <Row style={{ marginTop: "1.8rem" }}>
               <Col>
-                <div>Pending Ride Requests</div>
+                <h4 className="text-success">Pending Ride Requests</h4>
                 {rideRequests.rides.map((ride) => (
                   <Row className="p-2" key={ride._id}>
                     <Button
                       variant="outline-info"
                       onClick={handleRideClick(ride)}
                     >
-                      Rider id {ride.rider}
+                      Passenger Name:{" "}
+                      <span className="text-black text-right pl-5">
+                        {ride.riderName}
+                      </span>
                     </Button>
                   </Row>
                 ))}
@@ -244,8 +262,14 @@ export default function RideRequest({ setToken, setActiveTrip }) {
                 {driver.map((r) => {
                   return (
                     <Container fluid="lg">
-                      <Row style={{ marginTop: "3rem" }}>
-                        <div>Driver Name: {r.name}</div>
+                      <Row style={{ marginTop: "2rem" }}>
+                        <div className="p-0">
+                          <h4>Passenger Details</h4>
+                          <p>First Name: {r.name}</p>
+                          <p>Last Name: {r.lastname}</p>
+                          <p>Email: {r.email}</p>
+                          <p>Phone Number{r.phone_number}</p>
+                        </div>
                       </Row>
                     </Container>
                   );

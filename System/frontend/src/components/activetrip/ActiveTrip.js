@@ -1,5 +1,6 @@
 import { React, useState, useEffect, useRef } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
+
 import {
   GoogleMap,
   DirectionsRenderer,
@@ -23,8 +24,8 @@ const options = {
   zoomControl: true,
 };
 const center = {
-  lat: 0.6907,
-  lng: 34.7837,
+  lat: -0.6773283,
+  lng: 34.7796,
 };
 export default function ActiveTrip({ setActiveTrip }) {
   // For Map

@@ -21,7 +21,7 @@ import Geocode from "react-geocode";
 import { Navigate } from "react-router-dom";
 import url from "../../../env";
 
-Geocode.setApiKey("AIzaSyCCZcb_AEAcCRk0uxe-GjAtUU_ewjpDXIM");
+Geocode.setApiKey("AIzaSyD8MSGXG-7y2nXRtE90sv2IeLCElO2e3i0");
 
 const mapContainerStyle = {
   height: "45vh",
@@ -32,8 +32,8 @@ const options = {
   zoomControl: true,
 };
 const center = {
-  lat: 0.6907,
-  lng: 34.7837,
+  lat: -0.6773283,
+  lng: 34.7796,
 };
 
 export default function Drive({ setToken, setActiveTrip }) {
@@ -44,6 +44,19 @@ export default function Drive({ setToken, setActiveTrip }) {
     src: null,
     dst: null,
   });
+  const [data, setData] = useState({
+    src: {
+      lat: null,
+      lng: null,
+    },
+    dst: {
+      lat: null,
+      lng: null,
+    },
+    route: null,
+    dateTime: null,
+    max_riders: null,
+  });
   const [routeResp, setRouteResp] = useState();
   const [dateTime, setDateTime] = useState(
     new Date(new Date().getTime() + 60 * 60 * 1000)
@@ -53,12 +66,14 @@ export default function Drive({ setToken, setActiveTrip }) {
   const [srcName, setsrcName] = useState("");
   const [destName, setdestName] = useState("");
   const [redirect, setRedirect] = useState(false);
+  const [driveMessage, setDriveMessage] = useState("");
 
   const mapRef = useRef();
   const onMapLoad = (map) => {
     mapRef.current = map;
   };
 
+  
   const openMapModal = (mapType) => {
     setMapType(mapType);
     setModalTitle(mapType === "src" ? "Start" : "Destination");
@@ -100,16 +115,17 @@ export default function Drive({ setToken, setActiveTrip }) {
     getLocFromCoords(mapData, mapType);
   };
 
-  const directionsCallback = (response) => {
-    if (response !== null) {
-      if (response.status === "OK") setRouteResp(response);
+  const directionsCallback = (drive) => {
+    if (drive !== null) {
+      if (drive.status === "OK") setRouteResp(drive);
       else alert("Problem fetching directions");
     } else alert("Problem fetching directions");
   };
 
-  const handleDriveSubmit = (event) => {
+  const handleDriveSubmit = async (event) => {
     event.preventDefault();
-    const data = {
+    console.log(routeResp.routes[0]);
+    setData({
       src: {
         lat: mapCoords.src.lat,
         lng: mapCoords.src.lng,
@@ -121,30 +137,35 @@ export default function Drive({ setToken, setActiveTrip }) {
       route: routeResp.routes[0].overview_path,
       dateTime: dateTime,
       max_riders: riders,
-    };
-    return fetch(`${url}/trip/drive`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // 'Authorization': 'Bearer ' + Cookies.get('tokken'),  //another working solution
-        Coookie: Cookies.get("tokken"),
-      },
-      body: JSON.stringify(data),
-    })
-      .then((response) => {
-        if (response.ok) return response.json();
-        else if (response.status === 401) setToken(null);
-        throw new Error(response.statusText);
-      })
-      .then((responseJson) => {
-        alert("Your drive is scheduled");
-        setRedirect(true);
-      })
-      .catch((error) => {
-        console.log(error);
-        alert(error);
-        window.location.reload();
+    });
+    
+    if (data.src.lat === data.dst.lat && data.src.lng === data.dst.lng) {
+      setDriveMessage(
+        "Error: Start Location cannot be the same as Destination Location!"
+      );
+    } else {
+      return fetch(`${url}/trip/drive`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // 'Authorization': 'Bearer ' + Cookies.get('tokken'),  //another working solution
+          Coookie: Cookies.get("tokken"),
+        },
+        body: JSON.stringify(data),
+      }).then((drive) => {
+        if (drive.ok) {
+          setDriveMessage("Your drive is scheduled!");
+          setTimeout(() => {
+            setRedirect(true);
+          }, 1000);
+          return drive.json();
+        } else if (drive.status === 401) {
+          setToken(null);
+        } else {
+          setDriveMessage(drive.data.message);
+        }
       });
+    }
   };
 
   useEffect(() => {
@@ -154,7 +175,15 @@ export default function Drive({ setToken, setActiveTrip }) {
   return (
     <>
       {redirect ? <Navigate to="/ride-request" /> : <></>}
-      {/* <div style={{ width: '100%', height: '100%', textAlign: 'center' }}> */}
+      {driveMessage && (
+        <Container
+          className={`rounded mb-4 mt-4 ${
+            driveMessage.startsWith("Error") ? "bg-danger" : "bg-success"
+          }`}
+        >
+          <p className="text-white py-2 text-center">{driveMessage}</p>
+        </Container>
+      )}
       <Container fluid="lg">
         <Row style={{ marginTop: "3rem" }}>
           <Col md>
@@ -172,6 +201,7 @@ export default function Drive({ setToken, setActiveTrip }) {
                     readOnly
                     defaultValue="Starting position not selected"
                     value={mapCoords["src"] ? srcName : null}
+                    required
                   />
                 </Col>
                 <Col xs="3">
@@ -188,6 +218,7 @@ export default function Drive({ setToken, setActiveTrip }) {
               <Form.Group as={Row} className="mb-3" controlId="dst">
                 <Col xs="9">
                   <Form.Control
+                    required
                     readOnly
                     defaultValue="Destination not selected"
                     value={mapCoords["dst"] ? destName : null}
@@ -210,6 +241,7 @@ export default function Drive({ setToken, setActiveTrip }) {
                 </Col>
                 <Col xs="6">
                   <DatePicker
+                    required
                     showTimeSelect
                     selected={dateTime}
                     minDate={new Date()}
@@ -226,6 +258,7 @@ export default function Drive({ setToken, setActiveTrip }) {
                     label="Select number of people can ride with"
                   >
                     <Form.Select
+                      required
                       onChange={(e) => {
                         setRiders(e.target.value);
                       }}

@@ -25,9 +25,10 @@ export default function Profile() {
   const [vseat, setvSeat] = useState();
   const [vmodel, setvModel] = useState();
   const [vyear, setvYear] = useState();
+  const [vLicensePlate, setvLicensePlate] = useState();
   const userDefaultDetails = {
     address: "Kisii, Kenya",
-    mobile: "+254712345678",
+    mobile: "+254712345698",
   };
   const id = localStorage.getItem("id");
   // var isadmin =
@@ -58,6 +59,7 @@ export default function Profile() {
       VehicleModel: vmodel,
       VehicleSeats: vseat,
       VehicleYear: vyear,
+      VehicleLicensePlate: vLicensePlate,
     };
 
     axios
@@ -136,6 +138,19 @@ export default function Profile() {
       }}
     />
   );
+  let VehicleLicensePlate = isVehicle ? (
+    user.VehicleLicensePlate
+  ) : (
+    <MDBInput
+      required="true"
+      id="vehiclelicenseplate"
+      type="text"
+      value={vyear}
+      onChange={(e) => {
+        setvLicensePlate(e.target.value);
+      }}
+    />
+  );
 
   return (
     <section style={{ backgroundColor: "#eee" }}>
@@ -198,7 +213,9 @@ export default function Profile() {
                   </MDBCol>
                   <MDBCol sm="9">
                     <MDBCardText className="text-muted">
-                      {userDefaultDetails.mobile}
+                      {user.phone_number
+                        ? user.phone_number
+                        : userDefaultDetails.mobile}
                     </MDBCardText>
                   </MDBCol>
                 </MDBRow>
@@ -272,6 +289,15 @@ export default function Profile() {
                             Vehicle Year
                           </MDBCardText>
                           {VehicleYear}
+                        </Col>
+                        <Col>
+                          <MDBCardText
+                            className="mt-4 mb-1"
+                            style={{ fontSize: ".77rem" }}
+                          >
+                            Vehicle LicensePlate
+                          </MDBCardText>
+                          {VehicleLicensePlate}
                         </Col>
                       </Row>
                     </Container>

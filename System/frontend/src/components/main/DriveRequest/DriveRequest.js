@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 import * as AiIcons from "react-icons/ai";
 import url from "../../../env";
 
-Geocode.setApiKey("AIzaSyCCZcb_AEAcCRk0uxe-GjAtUU_ewjpDXIM");
+Geocode.setApiKey("AIzaSyD8MSGXG-7y2nXRtE90sv2IeLCElO2e3i0");
 
 const mapContainerStyle = {
   height: "45vh",
@@ -23,10 +23,9 @@ const options = {
   zoomControl: true,
 };
 const center = {
-  lat: 0.6907,
-  lng: 34.7837,
+  lat: -0.6773283,
+  lng: 34.7796,
 };
-
 const baseKmRate = 1;
 const baseMinRate = 0.1;
 const addKlocationmRate = 2;
@@ -36,22 +35,22 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
   const [showModal, setShowModal] = useState(false);
   const [mapType, setMapType] = useState();
   const [modalTitle, setModalTitle] = useState("Title Error");
+  const [routeResp, setRouteResp] = useState();
+  const [dateTime, setDateTime] = useState(
+    new Date(new Date().getTime() + 60 * 60 * 1000)
+  );
   const [mapCoords, setMapCoords] = useState({
     src: null,
     dst: null,
   });
-  const [routeResp, setRouteResp] = useState();
-  const [rideRouteResp, setRideRouteResp] = useState({ reload: false });
-  const [rideTrip, setRideTrip] = useState();
-  const [dateTime, setDateTime] = useState(
-    new Date(new Date().getTime() + 60 * 60 * 1000)
-  );
   const [rider, setRider] = useState([]);
   const [ride, setRide] = useState([]);
   const [finding, setFinding] = useState(true);
 
   const [srcName, setsrcName] = useState("");
   const [destName, setdestName] = useState("");
+  const [rideRouteResp, setRideRouteResp] = useState({ reload: false });
+  const [rideTrip, setRideTrip] = useState();
 
   const [rideRequests, setRideRequests] = useState({ loading: true });
   const [calculationData, setCalculationData] = useState({});
@@ -60,6 +59,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
   const onMapLoad = (map) => {
     mapRef.current = map;
   };
+  const [responseMessage, setResponseMessage] = useState();
 
   const openMapModal = (mapType) => {
     setMapType(mapType);
@@ -106,16 +106,28 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
     if (response !== null) {
       console.log(`directionsCallback`, response);
       if (response.status === "OK") setRouteResp(response);
-      else alert("Problem fetching directions");
-    } else alert("Problem fetching directions");
+      else
+        setResponseMessage(
+          `Error: Your Network connection is slow, Problem fetching Directions!`
+        );
+    } else
+      setResponseMessage(
+        `Error: Your Network connection is slow, Problem fetching Directions!`
+      );
   };
 
   const rideDirectionsCallback = (response) => {
     if (response !== null) {
       if (response.status === "OK")
         setRideRouteResp({ rideData: response, reload: false });
-      else alert("Problem fetching directions");
-    } else alert("Problem fetching directions");
+      else
+        setResponseMessage(
+          `Error: Your Network connection is slow, Problem fetching Directions!`
+        );
+    } else
+      setResponseMessage(
+        `Error: Your Network connection is slow, Problem fetching Directions!`
+      );
   };
 
   const updateCalculation = (s1, d1, s2, d2, trip) => {
@@ -127,6 +139,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
         travelMode: "DRIVING",
       })
       .then((result) => {
+        console.log(result);
         if (
           result &&
           result.rows &&
@@ -135,7 +148,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
           result.rows[0].elements.length > 0
         ) {
           var pickUpLocation = result.originAddresses[1];
-          var dropOffLocation = result.originAddresses[2];
+          var dropOffLocation = result.destinationAddresses[2];
 
           var oldDuration = result.rows[0].elements[2].duration.value;
           var newDuration =
@@ -144,9 +157,9 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
             result.rows[2].elements[2].duration.value;
           var originalDistance = result.rows[0].elements[2].duration.value;
           var newDistance =
-            result.rows[0].elements[0].duration.value +
-            result.rows[1].elements[1].duration.value +
-            result.rows[2].elements[2].duration.value;
+            result.rows[0].elements[0].distance.value +
+            result.rows[1].elements[1].distance.value +
+            result.rows[2].elements[2].distance.value;
 
           var fare =
             (originalDistance * baseKmRate) / 1000 +
@@ -162,7 +175,6 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
           setCalculationData({
             pickUpLocation,
             dropOffLocation,
-            pickUpLocation,
             newDistance,
             newDuration,
             fare,
@@ -202,6 +214,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
         throw new Error(response.statusText);
       })
       .then((responseJson) => {
+        console.log(`USER DETAILs`, responseJson.user);
         setRider([responseJson.user]);
       })
       .catch((error) => {
@@ -263,6 +276,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
         }
       })
       .then((responseJson) => {
+        console.log("Drive Requests", responseJson);
         setRideRequests({
           rides: [...responseJson.rideRequests],
           loading: false,
@@ -279,17 +293,58 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
         <div>Loading...</div>
       ) : rideRequests != null && rideRequests.rides.length > 0 ? (
         <>
+          {responseMessage && (
+            <Container
+              className={`rounded mb-4 mt-4 ${
+                responseMessage.startsWith("Error") ? "bg-danger" : "bg-success"
+              }`}
+            >
+              <p className="text-white py-2 text-center">{responseMessage}</p>
+            </Container>
+          )}
           <Container fluid="lg">
             <Row style={{ marginTop: "3rem" }}>
               <Col>
-                <div>Pending Ride Requests</div>
+                <div>Pending Drive Requests</div>
                 {rideRequests.rides.map((ride) => (
                   <Row className="p-2" key={ride._id}>
                     <Button variant="info" onClick={handleRideClick(ride)}>
-                      Rider Name {ride.riderName}
+                      Driver Name {ride.riderName}
                     </Button>
                   </Row>
                 ))}
+                <Row>
+                  {ride &&
+                    rider.map((r) => {
+                      return (
+                        <Container fluid="lg">
+                          <Row>
+                            <>
+                              <h5>Driver Details</h5>
+
+                              <div>
+                                <b>Name:</b> {r.name || ""}
+                              </div>
+                              <div>
+                                <b>Last Name</b> {r.lastname || ""}
+                              </div>
+                              <div>
+                                <b>Phone Number</b> {r.phone_number || ""}
+                              </div>
+
+                              <div>
+                                <b>Vehicle Name:</b> {r.VehicleName || ""}
+                              </div>
+                              <div>
+                                <b>Vehicle License Plate:</b>{" "}
+                                {r.VehicleLicensePlate || ""}
+                              </div>
+                            </>
+                          </Row>
+                        </Container>
+                      );
+                    })}
+                </Row>
               </Col>
               <Col>
                 <Row>

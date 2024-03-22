@@ -3,6 +3,7 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import "./SignUp.css";
 import { Link } from "react-router-dom";
+import url from "../../env";
 
 export default function SignUp({ setToken }) {
   const [name, setName] = useState("");
@@ -10,10 +11,10 @@ export default function SignUp({ setToken }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmpassword, setconfirmPassword] = useState("");
-  const [phone_number, setPhoneNumber] = useState();
+  const [phone_number, setPhoneNumber] = useState("");
 
-  function signupUser(userDetails) {
-    return fetch("http://127.0.0.1:8080/api" + "/signup", {
+  const signupUser = async (userDetails) => {
+    return fetch(`${url}/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -33,7 +34,7 @@ export default function SignUp({ setToken }) {
       .catch((error) => {
         alert(error);
       });
-  }
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = {
@@ -57,7 +58,9 @@ export default function SignUp({ setToken }) {
 
   function validateForm() {
     return (
-      email.length > 0 &&
+      email.length > 10 &&
+      email.length < 13 &&
+      phone_number.length > 0 &&
       password.length > 0 &&
       name.length > 0 &&
       lastname.length > 0 &&
@@ -101,6 +104,17 @@ export default function SignUp({ setToken }) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+            />
+          </Form.Group>
+          <Form.Group size="lg" controlId="email">
+            <Form.Label>Phone Number</Form.Label>
+            <Form.Control
+              autoFocus
+              data-test="email-form-control"
+              type="text"
+              value={phone_number}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="+254123456789"
             />
           </Form.Group>
 

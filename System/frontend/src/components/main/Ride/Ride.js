@@ -1,13 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import {
-  Button,
-  Col,
-  Container,
-
-  Form,
-  Row,
-} from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useRef } from "react";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import MapSelector from "../MapSelector";
 import {
   DirectionsRenderer,
@@ -21,7 +13,7 @@ import Geocode from "react-geocode";
 import { Navigate } from "react-router-dom";
 import url from "../../../env";
 
-Geocode.setApiKey("AIzaSyCCZcb_AEAcCRk0uxe-GjAtUU_ewjpDXIM");
+Geocode.setApiKey("AIzaSyD8MSGXG-7y2nXRtE90sv2IeLCElO2e3i0");
 
 const mapContainerStyle = {
   height: "45vh",
@@ -32,8 +24,8 @@ const options = {
   zoomControl: true,
 };
 const center = {
-  lat: 0.6907,
-  lng: 34.7837,
+  lat: -0.6773283,
+  lng: 34.7796,
 };
 
 export default function Ride({ setToken, setActiveTrip, name }) {
@@ -124,7 +116,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
     } else alert("Problem fetching directions");
   };
 
-  const handleRideSubmit = (event) => {
+  const handleRideSubmit = async (event) => {
     event.preventDefault();
     const data = {
       src: {
@@ -166,12 +158,19 @@ export default function Ride({ setToken, setActiveTrip, name }) {
       });
   };
 
-  const updateCalculation = (s1, d1, s2, d2, trip) => {
+  const updateCalculation = (s1, s2, d1, d2, trip) => {
+    // updateCalculation(
+    //   trip.source,
+    //   trip.destination,
+    //   mapCoords.src,
+    //   mapCoords.dst,
+    //   trip
+    // );
     const service = new window.google.maps.DistanceMatrixService();
     service
       .getDistanceMatrix({
-        origins: [s1, s2, d2],
-        destinations: [s2, d2, d1],
+        origins: [s1, s2],
+        destinations: [d1, d2],
         travelMode: "DRIVING",
       })
       .then((result) => {
@@ -185,15 +184,15 @@ export default function Ride({ setToken, setActiveTrip, name }) {
         ) {
           var pickUpDuration = result.rows[0].elements[0].duration.value;
           var destinationDuration =
-            result.rows[0].elements[0].duration.value +
-            result.rows[1].elements[1].duration.value;
+            result.rows[0].elements[0].distance.value +
+            result.rows[1].elements[1].distance.value;
           var date = new Date(trip.dateTime);
           var pickUpDateTime = new Date(date.getTime() + pickUpDuration * 1000);
           var destinationDateTime = new Date(
             date.getTime() + destinationDuration * 1000
           );
           var pickUpLocation = result.originAddresses[1];
-          var dropOffLocation = result.originAddresses[2];
+          var dropOffLocation = result.destinationAddresses[0];
 
           var distance =
             result.rows[0].elements[0].duration.value +
@@ -217,8 +216,8 @@ export default function Ride({ setToken, setActiveTrip, name }) {
     setRideRouteResp({ ...rideRouteResp, reload: true });
     updateCalculation(
       trip.source,
-      trip.destination,
       mapCoords.src,
+      trip.destination,
       mapCoords.dst,
       trip
     );
@@ -236,18 +235,16 @@ export default function Ride({ setToken, setActiveTrip, name }) {
         throw new Error(response.statusText);
       })
       .then((responseJson) => {
-        console.log(trip);
         setDriver([responseJson.user]);
       })
       .catch((error) => {
-        console.log(error);
         alert(error);
         // window.location.reload();
       });
   };
 
   const handleRideRequest = (driver) => (e) => {
-    console.log(`handleRequestRide`, driver);
+    // console.log(`handleRequestRide`, driver);
     fetch(`${url}/trip/request`, {
       method: "POST",
       headers: {
@@ -275,7 +272,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
         setRedirect(true);
       })
       .catch((error) => {
-        console.log(error);
+        // console.log(error);
         alert(error);
         // window.location.reload();
       });
@@ -452,7 +449,6 @@ export default function Ride({ setToken, setActiveTrip, name }) {
                         {trip.driverDetails.name +
                           " " +
                           trip.driverDetails.lastname}
-                        {/* Car Pool with {trip.driver} */}
                       </Button>
                     </Row>
                   );
@@ -490,7 +486,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
                     )}
                   </GoogleMap>
                   {driver.map((r) => {
-                    console.log(r);
+                    // console.log(r);
                     return (
                       <Container fluid="lg">
                         <Row>
@@ -534,7 +530,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
                                 </div>
                                 <div>
                                   <b>Your Travelling Distance:</b>{" "}
-                                  {calculationData.distance + " km" || ""}
+                                  {calculationData.distance / 100 + " km" || ""}
                                 </div>
                               </>
                             )}
