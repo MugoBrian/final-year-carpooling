@@ -58,9 +58,9 @@ export default function SignUp({ setToken }) {
 
   function validateForm() {
     return (
-      email.length > 10 &&
-      email.length < 13 &&
-      phone_number.length > 0 &&
+      phone_number.length > 10 &&
+      phone_number.length < 14 &&
+      email.length > 0 &&
       password.length > 0 &&
       name.length > 0 &&
       lastname.length > 0 &&
@@ -110,7 +110,7 @@ export default function SignUp({ setToken }) {
             <Form.Label>Phone Number</Form.Label>
             <Form.Control
               autoFocus
-              data-test="email-form-control"
+              data-test="phone-form-control"
               type="text"
               value={phone_number}
               onChange={(e) => setPhoneNumber(e.target.value)}

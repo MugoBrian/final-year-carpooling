@@ -302,16 +302,13 @@ exports.cancelTrip = (req, res) => {
 
 exports.tripHistory = (req, res) => {
   User.findById(req.auth._id, (err, user) => {
-    // if (err)
-    //     return res.status(500).end();
-    // else {
-    Trip.find({ _id: { $in: user.trips } }, (err, trips) => {
-      // if (err)
-      //     return res.status(500).end();
-      res.status(200).json(trips);
-      return res;
-    });
-    // }
+    if (err) return res.status(500).end();
+    else {
+      Trip.find({ _id: { $in: user.trips } }, (err, trips) => {
+        if (err) return res.status(500).end();
+        return res.status(200).json(trips);
+      });
+    }
   });
 };
 
@@ -460,7 +457,7 @@ exports.driveRequests = (req, res) => {
           rideRequests.push(requestDto);
         }
       });
-      return res.status(200).json({ rideRequests });
+      res.status(200).json({ rideRequests });
     }
   );
 };
@@ -492,36 +489,47 @@ exports.rideRequests = (req, res) => {
 };
 
 exports.updateRequest = (req, res) => {
-  var action = req.body.action || "accepted";
+  const action = req.body.action || "accepted";
 
+  // Find the trip request by ID
   TripRequest.findById(req.body.tripRequest, (err, tripRequest) => {
-    tripRequest.state = req.body.action;
+    if (err || !tripRequest) {
+      return res.status(400).json({ msg: "Trip request not found" });
+    }
+
+    // Update the trip request state
+    tripRequest.state = action;
     tripRequest.save((err, tr) => {
+      if (err) { 
+        return res.status(500).json({ msg: "Error saving trip request" });
+      }
+
+      // Find the trip by ID
       Trip.findById(req.body.trip, (err, trip) => {
-        if (trip == null || trip.available_riders <= 0) {
+        if (err || !trip) {
+          return res.status(400).json({ msg: "Trip not found" });
+        }
+        if (trip.available_riders <= 0) {
           return res.status(200).json({ msg: "Trip is filled" });
         }
         if (trip.dateTime < new Date()) {
           return res.status(200).json({ msg: "Trip is completed" });
         }
-        if (action == "accepted") {
-          trip.riders = [...trip.riders, tripRequest.rider];
-          trip.waypoints = [
-            ...trip.waypoints,
-            tripRequest.source,
-            tripRequest.destination,
-          ];
+
+        // Handle trip acceptance
+        if (action === "accepted") {
+          trip.riders.push(tripRequest.riders);
+          trip.waypoints.push(tripRequest.source, tripRequest.destination);
           trip.save((err, trip) => {
-            var msg =
-              action == "accepted"
-                ? "Trip Accepted successfully"
-                : "Trip Rejected successfully";
-            return res.status(200).json({ msg });
+            if (err) {
+              return res.status(500).json({ msg: "Error saving trip" });
+            }
+            return res.status(200).json({ msg: "Trip Accepted successfully" });
           });
+        } else {
+          return res.status(200).json({ msg: "Trip Rejected successfully" });
         }
       });
-      var msg = action == "accepted" ? "Trip Accepted" : "Trip Rejected";
-      return res.status(200).json({ msg });
     });
   });
 };

@@ -9,6 +9,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import Cookies from "js-cookie";
 import Geocode from "react-geocode";
 import * as MdIcons from "react-icons/md";
+import * as AiIcons from "react-icons/ai";
 import { Link } from "react-router-dom";
 import url from "../../../env";
 
@@ -187,7 +188,6 @@ export default function RideRequest({ setToken, setActiveTrip }) {
         }
       })
       .then((responseJson) => {
-        console.log(`Response from fetching requests`, responseJson);
         setRideRequests({
           rides: [...responseJson.rideRequests],
           loading: false,
@@ -280,10 +280,10 @@ export default function RideRequest({ setToken, setActiveTrip }) {
         </>
       ) : (
         <>
-          <div class="text-center" style={{ fontSize: "24px" }}>
+          <div className="text-center" style={{ fontSize: "24px" }}>
             No pending requests.
           </div>
-          <div class="text-center" style={{ margin: "1rem 0" }}>
+          <div className="text-center" style={{ margin: "1rem 0" }}>
             <Link to="/ride">
               <Button
                 variant="light-info"

@@ -71,6 +71,17 @@ function App() {
         />
         <Route
           exact
+          path="/active-trip"
+          element={
+            token ? (
+              <ActiveTrip setToken={setToken} setActiveTrip={setActiveTrip} />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          exact
           path="/drive"
           element={
             token ? (

@@ -12,6 +12,7 @@ import Cookies from "js-cookie";
 import Geocode from "react-geocode";
 import { Navigate } from "react-router-dom";
 import url from "../../../env";
+import ResponseDisplay from "../../ResponseDisplay";
 
 Geocode.setApiKey("AIzaSyD8MSGXG-7y2nXRtE90sv2IeLCElO2e3i0");
 
@@ -50,6 +51,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
   const [destName, setdestName] = useState("");
   const [driver, setDriver] = useState([]);
   const [calculationData, setCalculationData] = useState({});
+  const [responseMessage, setResponseMessage] = useState();
 
   const mapRef = useRef();
   const onMapLoad = (map) => {
@@ -104,16 +106,28 @@ export default function Ride({ setToken, setActiveTrip, name }) {
   const directionsCallback = (response) => {
     if (response !== null) {
       if (response.status === "OK") setRouteResp(response);
-      else alert("Problem fetching directions");
-    } else alert("Problem fetching directions");
+      else
+        setResponseMessage(
+          `Error: Your Network connection is slow, Problem fetching Directions!`
+        );
+    } else
+      setResponseMessage(
+        `Error: Your Network connection is slow, Problem fetching Directions!`
+      );
   };
 
   const rideDirectionsCallback = (response) => {
     if (response !== null) {
       if (response.status === "OK")
         setRideRouteResp({ rideData: response, reload: false });
-      else alert("Problem fetching directions");
-    } else alert("Problem fetching directions");
+      else
+        setResponseMessage(
+          `Error: Your Network connection is slow, Problem fetching Directions!`
+        );
+    } else
+      setResponseMessage(
+        `Error: Your Network connection is slow, Problem fetching Directions!`
+      );
   };
 
   const handleRideSubmit = async (event) => {
@@ -153,7 +167,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
       })
       .catch((error) => {
         console.log(error);
-        alert(error);
+        setResponseMessage(`Error: An Error Has Occurred!`);
         // window.location.reload();
       });
   };
@@ -238,7 +252,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
         setDriver([responseJson.user]);
       })
       .catch((error) => {
-        alert(error);
+        setResponseMessage(`Error: An Error Has Occurred!`);
         // window.location.reload();
       });
   };
@@ -254,6 +268,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
       },
       body: JSON.stringify({
         driver: driver._id,
+        driverName: driver.name,
         trip: rideTrip._id,
         src: mapCoords.src,
         dst: mapCoords.dst,
@@ -268,12 +283,12 @@ export default function Ride({ setToken, setActiveTrip, name }) {
         throw new Error(response.statusText);
       })
       .then((responseJson) => {
-        alert("You request has been submitted successfully");
+        setResponseMessage("You request has been submitted successfully");
         setRedirect(true);
       })
       .catch((error) => {
         // console.log(error);
-        alert(error);
+        setResponseMessage(`Error: An Error Has Occurred!`);
         // window.location.reload();
       });
   };
@@ -434,6 +449,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
         </>
       ) : trips && trips !== "null" && trips !== "undefined" ? (
         <>
+        <ResponseDisplay responseMessage={responseMessage} />
           <Container fluid="lg">
             <Row style={{ marginTop: "3rem" }}>
               <Col md>
@@ -538,6 +554,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
                             style={{ marginTop: "1rem" }}
                             variant="outline-info"
                             onClick={handleRideRequest(r)}
+                            // onClick={console.log(r)}
                           >
                             Request Ride
                           </Button>

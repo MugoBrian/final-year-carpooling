@@ -39,6 +39,7 @@ export default function TripHistory() {
       }
     );
     const data = await response.json();
+    console.log(data)
 
     // Parse Data
     let tempArray = [];

@@ -77,7 +77,7 @@ export default function Profile() {
     user.VehicleName
   ) : (
     <MDBInput
-      required
+      required={true}
       id="vehiclename"
       type="text"
       value={vname}
@@ -90,7 +90,7 @@ export default function Profile() {
     user.VehicleMake
   ) : (
     <MDBInput
-      required="true"
+      required={true}
       id="vehiclemake"
       type="text"
       value={vmake}
@@ -103,7 +103,7 @@ export default function Profile() {
     user.VehicleModel
   ) : (
     <MDBInput
-      required="true"
+      required={true}
       id="vehiclemodal"
       type="text"
       value={vmodel}
@@ -117,7 +117,7 @@ export default function Profile() {
   ) : (
     <MDBInput
       type="number"
-      required="true"
+      required={true}
       id="vehicleseat"
       value={vseat}
       onChange={(e) => {
@@ -129,7 +129,7 @@ export default function Profile() {
     user.VehicleYear
   ) : (
     <MDBInput
-      required="true"
+      required={true}
       id="vehicleyear"
       type="text"
       value={vyear}
@@ -142,7 +142,7 @@ export default function Profile() {
     user.VehicleLicensePlate
   ) : (
     <MDBInput
-      required="true"
+      required={true}
       id="vehiclelicenseplate"
       type="text"
       value={vyear}

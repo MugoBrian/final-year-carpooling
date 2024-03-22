@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import {
   DirectionsRenderer,
   DirectionsService,
@@ -28,6 +29,7 @@ const center = {
 };
 const baseKmRate = 1;
 const baseMinRate = 0.1;
+const ksh = 133;
 const addKlocationmRate = 2;
 const addMinRate = 0.2;
 
@@ -49,6 +51,8 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
 
   const [srcName, setsrcName] = useState("");
   const [destName, setdestName] = useState("");
+
+  const navigate = useNavigate();
   const [rideRouteResp, setRideRouteResp] = useState({ reload: false });
   const [rideTrip, setRideTrip] = useState();
 
@@ -147,31 +151,31 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
           result.rows[0].elements &&
           result.rows[0].elements.length > 0
         ) {
-          var pickUpLocation = result.originAddresses[1];
-          var dropOffLocation = result.destinationAddresses[2];
+          let pickUpLocation = result.originAddresses[1];
+          let dropOffLocation = result.destinationAddresses[2];
 
-          var oldDuration = result.rows[0].elements[2].duration.value;
-          var newDuration =
+          let oldDuration = result.rows[0].elements[2].duration.value;
+          let newDuration =
             result.rows[0].elements[0].duration.value +
             result.rows[1].elements[1].duration.value +
             result.rows[2].elements[2].duration.value;
-          var originalDistance = result.rows[0].elements[2].duration.value;
-          var newDistance =
+          let originalDistance = result.rows[0].elements[2].duration.value;
+          let newDistance =
             result.rows[0].elements[0].distance.value +
             result.rows[1].elements[1].distance.value +
             result.rows[2].elements[2].distance.value;
 
-          var fare =
+          let fare =
             (originalDistance * baseKmRate) / 1000 +
             (oldDuration * baseMinRate) / 60;
-          var addFare =
+          let addFare =
             ((newDistance - originalDistance) * baseKmRate) / 1000 +
             ((newDuration - oldDuration) * baseMinRate) / 60;
           if (addFare <= 0) {
             addFare = 1;
           }
-          var newDurationMin = parseInt(newDuration / 60);
-          var newDurationSec = (newDuration % 60).toFixed(0);
+          let newDurationMin = parseInt(newDuration / 60);
+          let newDurationSec = (newDuration % 60).toFixed(0);
           setCalculationData({
             pickUpLocation,
             dropOffLocation,
@@ -200,7 +204,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
       trip.pickUpPoints[1],
       trip
     );
-    fetch(`${url}/user/details?userId=${trip.rider}`, {
+    fetch(`${url}/user/details?userId=${trip.driver}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -235,17 +239,19 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
       body: JSON.stringify({ action, tripRequest: rideTrip._id }),
     })
       .then((response) => {
+        console.log(response);
         if (response.ok) return response.json();
         else if (response.status === 401) setToken(null);
+        else setResponseMessage('An Error Occurred!')
         throw new Error(response.statusText);
       })
       .then((responseJson) => {
-        alert(responseJson.msg);
-        window.location.reload();
+        setResponseMessage(responseJson.msg);
+        navigate("/active-trip");
       })
       .catch((error) => {
         console.log(error);
-        alert(error);
+        setResponseMessage('Error: An Error Occurred!')
         // window.location.reload();
       });
   };
@@ -308,8 +314,8 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
                 <div>Pending Drive Requests</div>
                 {rideRequests.rides.map((ride) => (
                   <Row className="p-2" key={ride._id}>
-                    <Button variant="info" onClick={handleRideClick(ride)}>
-                      Driver Name {ride.riderName}
+                    <Button letiant="info" onClick={handleRideClick(ride)}>
+                      Driver Name {ride.driverName}
                     </Button>
                   </Row>
                 ))}
@@ -414,11 +420,14 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
                                 </div>
                                 <div>
                                   <b>Base Fare:</b>{" "}
-                                  {"$" + calculationData.fare?.toFixed(2) || ""}
+                                  {"Ksh." +
+                                    calculationData.fare?.toFixed(1) * ksh ||
+                                    ""}
                                 </div>
                                 <div>
                                   <b>Additional Fare:</b>{" "}
-                                  {"$" + calculationData.addFare?.toFixed(2) ||
+                                  {"Ksh." +
+                                    calculationData.addFare?.toFixed(1) * ksh ||
                                     ""}
                                 </div>
                               </>
@@ -426,14 +435,14 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
                           <div>
                             <Button
                               style={{ margin: "1rem" }}
-                              variant="outline-info"
+                              letiant="outline-info"
                               onClick={handleRideAction("accepted")}
                             >
                               Accept Ride
                             </Button>
                             <Button
                               style={{ margin: "1rem" }}
-                              variant="outline-info"
+                              letiant="outline-info"
                               onClick={handleRideAction("rejected")}
                             >
                               Reject Ride
@@ -456,7 +465,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
           <div class="text-center" style={{ margin: "1rem 0" }}>
             <Link to="/drive">
               <Button
-                variant="light-info"
+                letiant="light-info"
                 className={"main-button"}
                 data-test="drive-button"
               >

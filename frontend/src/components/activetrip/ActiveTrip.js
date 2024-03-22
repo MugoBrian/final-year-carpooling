@@ -32,6 +32,8 @@ export default function ActiveTrip({ setActiveTrip }) {
   const [mapCoords, setMapCoords] = useState({});
   const [routeResp, setRouteResp] = useState();
   const [waypoints, setWaypoints] = useState([]);
+  const [responseMessage, setResponseMessage] = useState();
+
   const mapRef = useRef();
 
   const onMapLoad = (map) => {
@@ -41,8 +43,14 @@ export default function ActiveTrip({ setActiveTrip }) {
   const directionsCallback = (response) => {
     if (response !== null) {
       if (response.status === "OK") setRouteResp(response);
-      else alert("Problem fetching directions");
-    } else alert("Problem fetching directions");
+      else
+        setResponseMessage(
+          `Error: Your Network connection is slow, Problem fetching Directions!`
+        );
+    } else
+      setResponseMessage(
+        `Error: Your Network connection is slow, Problem fetching Directions!`
+      );
   };
 
   // Format date and time
@@ -126,7 +134,8 @@ export default function ActiveTrip({ setActiveTrip }) {
       .then((response) => {
         if (response.ok) {
           setActiveTrip(null);
-          alert("Trip cancelled successfully");
+          setResponseMessage("Trip cancelled successfully");
+
           window.location.reload();
           return;
         }
@@ -246,29 +255,30 @@ export default function ActiveTrip({ setActiveTrip }) {
       </GoogleMap>
       <Container id="activeTripContainer" fluid="lg">
         <Row style={{ marginTop: "1rem" }}>
-          <Col md="10">
+          <Col md="8">
             <h1>Active Trip Details</h1>
             <Row>
-              <h3 style={{ marginTop: "1rem" }}>
+              <h6 style={{ marginTop: "1rem" }}>
                 <span className="trip-attributes">Start</span>: {source}
-              </h3>
-              <h3>
+              </h6>
+              <h6>
                 <span className="trip-attributes">Destination</span>:{" "}
                 {destination}
-              </h3>
-              <h3>
+              </h6>
+              <h6>
                 <span className="trip-attributes">Date</span>: {datetime}
-              </h3>
-              <h3 style={{ marginTop: "1rem" }}>
+              </h6>
+              <h6 style={{ marginTop: "0.4rem" }}>
                 <span className="trip-attributes">Driver</span>: {driver}
-              </h3>
-              <h3>
+              </h6>
+              <h6>
                 <span className="trip-attributes">Rider(s)</span>: {riders}
-              </h3>
+              </h6>
             </Row>
           </Col>
-          <Col md="2">
-            <Row>
+          <Col md="4">
+            <Row style={{ marginTop: "1rem" }}>
+              
               {isDriver ? (
                 <Button
                   variant="primary"
@@ -280,6 +290,7 @@ export default function ActiveTrip({ setActiveTrip }) {
                 </Button>
               ) : null}
               <Button
+                style={{ marginTop: "4rem" }}
                 variant="danger"
                 id="cancelTripButton"
                 onClick={handleCancel}
