@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   DirectionsRenderer,
   DirectionsService,
@@ -48,7 +50,8 @@ export default function RideRequest({ setToken, setActiveTrip }) {
   const [rideRouteResp, setRideRouteResp] = useState({ reload: false });
   const [driver, setDriver] = useState([]);
   const [ride, setRide] = useState([]);
-
+  const id = localStorage.getItem("id");
+  const navigate = useNavigate();
   const [rideRequests, setRideRequests] = useState({ loading: true });
   const [responseMessage, setResponseMessage] = useState();
 
@@ -86,6 +89,21 @@ export default function RideRequest({ setToken, setActiveTrip }) {
       }
     );
   };
+  useEffect(() => {
+    axios.get(`${url}/user/details?userId=${id}`).then((res) => {
+      if (
+        res.data.user.VehicleLicensePlate === null ||
+        res.data.user.VehicleLicensePlate === ""
+      ) {
+        setResponseMessage(
+          "Error: Update Your Vehicle Details To Schedule A Drive. Redirecting..."
+        );
+        setTimeout(() => {
+          return navigate("/profile");
+        }, 2000);
+      }
+    });
+  }, [id, navigate]);
 
   const handleCallback = (closeButtonClicked, mapType, mapData) => {
     setShowModal(false);
@@ -141,7 +159,6 @@ export default function RideRequest({ setToken, setActiveTrip }) {
         throw new Error(response.statusText);
       })
       .then((responseJson) => {
-        console.log("response user", responseJson.user);
         setDriver([responseJson.user]);
       })
       .catch((error) => {

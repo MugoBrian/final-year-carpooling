@@ -12,6 +12,7 @@ const allusersRoutes = (req, res) => {
 };
 
 const userDetails = (req, res) => {
+  req.query.userId = req.query.userId ? req.query.userId : req.auth._id;
   User.findById(req.query.userId, (err, user) => {
     if (err) return res.status(500).end();
     return res.status(200).json({ user });
@@ -29,6 +30,7 @@ const updateUserDetailsVehicles = async (req, res) => {
       VehicleModel,
       VehicleSeats,
       VehicleYear,
+      VehicleLicensePlate,
     } = req.body;
 
     const missingFields = [];
@@ -39,6 +41,7 @@ const updateUserDetailsVehicles = async (req, res) => {
       "VehicleModel",
       "VehicleSeats",
       "VehicleYear",
+      "VehicleLicensePlate",
     ];
 
     for (const field of requiredFields) {
@@ -63,6 +66,7 @@ const updateUserDetailsVehicles = async (req, res) => {
             VehicleModel,
             VehicleSeats,
             VehicleYear,
+            VehicleLicensePlate,
           },
         },
         {

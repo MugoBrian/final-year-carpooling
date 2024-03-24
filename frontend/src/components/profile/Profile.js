@@ -31,16 +31,6 @@ export default function Profile() {
     mobile: "+254712345698",
   };
   const id = localStorage.getItem("id");
-  // var isadmin =
-  //   localStorage.getItem("isadmin") === 1 ? (
-  //     <MDBBtn>
-  //       <Link className="text-reset fw-bold" to="/admin">
-  //         User Details
-  //       </Link>
-  //     </MDBBtn>
-  //   ) : (
-  //     <></>
-  //   );
 
   useEffect(() => {
     axios.get(`${url}/user/details?userId=${id}`).then((res) => {
@@ -66,7 +56,7 @@ export default function Profile() {
       .post(`${url}/user/updatedetails`, updateUser)
       .then((res) => {
         setResponseMessage(res.data.message);
-        window.reload();
+        window.location.reload();
       })
       .catch((err) => {
         setResponseMessage(err.response.data.message);
@@ -145,7 +135,7 @@ export default function Profile() {
       required={true}
       id="vehiclelicenseplate"
       type="text"
-      value={vyear}
+      value={vLicensePlate}
       onChange={(e) => {
         setvLicensePlate(e.target.value);
       }}
