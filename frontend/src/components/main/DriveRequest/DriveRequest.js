@@ -194,7 +194,6 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
   };
 
   const handleRideClick = (trip) => (e) => {
-    // console.log(`ride`, trip)
     setRideTrip(trip);
     setRideRouteResp({ ...rideRouteResp, reload: true });
     updateCalculation(
@@ -229,6 +228,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
   };
 
   const handleRideAction = (action) => (e) => {
+    console.log("This is the ride trip before hiitting accept", rideTrip);
     fetch(`${url}/update/request/`, {
       method: "POST",
       headers: {
@@ -236,13 +236,18 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
         // 'Authorization': 'Bearer ' + Cookies.get('tokken'),  //another working solution
         Coookie: Cookies.get("tokken"),
       },
-      body: JSON.stringify({ action, tripRequest: rideTrip._id }),
+      body: JSON.stringify({
+        action,
+        tripRequest: rideTrip._id,
+        trip: rideTrip.trip,
+        rider: rideTrip.rider,
+      }),
     })
       .then((response) => {
         console.log(response);
         if (response.ok) return response.json();
         else if (response.status === 401) setToken(null);
-        else setResponseMessage('An Error Occurred!')
+        else setResponseMessage("Error: An Error Occurred!");
         throw new Error(response.statusText);
       })
       .then((responseJson) => {
@@ -251,7 +256,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
       })
       .catch((error) => {
         console.log(error);
-        setResponseMessage('Error: An Error Occurred!')
+        setResponseMessage("Error: An Error Occurred!");
         // window.location.reload();
       });
   };

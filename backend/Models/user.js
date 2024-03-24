@@ -29,7 +29,6 @@ const userSchema = new schema(
       type: String,
       trim: true,
       minlength: 10,
-      default: "+25412345678",
     },
     VehicleName: {
       type: String,
@@ -54,7 +53,6 @@ const userSchema = new schema(
     VehicleLicensePlate: {
       type: String,
       require: false,
-      default: "KAA 203R",
     },
     encry_password: {
       type: String,

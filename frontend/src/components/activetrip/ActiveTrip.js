@@ -1,11 +1,11 @@
 import { React, useState, useEffect, useRef } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 import {
   GoogleMap,
   DirectionsRenderer,
   DirectionsService,
-  Marker,
 } from "@react-google-maps/api";
 import Cookies from "js-cookie";
 import Geocode from "react-geocode";
@@ -13,7 +13,7 @@ import Geocode from "react-geocode";
 import "./ActiveTrip.css";
 import url from "../../env";
 
-Geocode.setApiKey(process.env.REACT_APP_MAPS_API_KEY);
+Geocode.setApiKey("AIzaSyD8MSGXG-7y2nXRtE90sv2IeLCElO2e3i0");
 // Map options
 const mapContainerStyle = {
   height: "35vh",
@@ -29,6 +29,7 @@ const center = {
 };
 export default function ActiveTrip({ setActiveTrip }) {
   // For Map
+  const navigate = useNavigate();
   const [mapCoords, setMapCoords] = useState({});
   const [routeResp, setRouteResp] = useState();
   const [waypoints, setWaypoints] = useState([]);
@@ -116,7 +117,7 @@ export default function ActiveTrip({ setActiveTrip }) {
         }
       })
       .catch((error) => {
-        alert(error);
+        setIsDriver(false);
       });
   }, []);
 
@@ -133,10 +134,11 @@ export default function ActiveTrip({ setActiveTrip }) {
     })
       .then((response) => {
         if (response.ok) {
-          setActiveTrip(null);
           setResponseMessage("Trip cancelled successfully");
-
-          window.location.reload();
+          setTimeout(() => {
+            setActiveTrip(null);
+            navigate("/drive-request");
+          }, 1000);
           return;
         }
         throw new Error(response.statusText);
@@ -160,9 +162,12 @@ export default function ActiveTrip({ setActiveTrip }) {
     })
       .then((response) => {
         if (response.ok) {
-          setActiveTrip(null);
-          alert("Trip marked completed");
-          window.location.reload();
+          setResponseMessage("Trip marked completed!");
+          setTimeout(() => {
+            setActiveTrip(null);
+            navigate("/trip-history");
+          }, 1000);
+
           return;
         }
         throw new Error(response.statusText);
@@ -218,11 +223,10 @@ export default function ActiveTrip({ setActiveTrip }) {
       .catch((error) => {
         alert(error);
       });
-  }, []);
+  }, [mapCoords]);
 
   return (
     <>
-      {/* <h1 id="pageTitle">Active Trip</h1> */}
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
         zoom={15}
@@ -278,7 +282,6 @@ export default function ActiveTrip({ setActiveTrip }) {
           </Col>
           <Col md="4">
             <Row style={{ marginTop: "1rem" }}>
-              
               {isDriver ? (
                 <Button
                   variant="primary"
@@ -289,15 +292,29 @@ export default function ActiveTrip({ setActiveTrip }) {
                   Done{" "}
                 </Button>
               ) : null}
-              <Button
-                style={{ marginTop: "4rem" }}
-                variant="danger"
-                id="cancelTripButton"
-                onClick={handleCancel}
-              >
-                {" "}
-                Cancel trip{" "}
-              </Button>
+              {ActiveTrip || !responseMessage ? (
+                <Button
+                  style={{ marginTop: "4rem" }}
+                  variant="danger"
+                  id="cancelTripButton"
+                  onClick={handleCancel}
+                >
+                  {" "}
+                  Cancel trip{" "}
+                </Button>
+              ) : (
+                <Container
+                  className={`rounded mb-4 mt-4 ${
+                    responseMessage.startsWith("Error")
+                      ? "bg-danger"
+                      : "bg-success"
+                  }`}
+                >
+                  <p className="text-white py-2 text-center">
+                    {responseMessage}
+                  </p>
+                </Container>
+              )}
             </Row>
           </Col>
         </Row>

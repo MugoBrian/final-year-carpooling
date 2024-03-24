@@ -24,9 +24,10 @@ exports.activeTrip = (req, res) => {
       return res.status(400).end();
     }
     Trip.findById(user.active_trip, (err, trip) => {
+      console.log(trip);
       User.findById(trip.driver, (err, user_driver) => {
         const riders = trip.riders;
-
+        console.log(user_driver);
         if (riders.length === 0) {
           res.status(200).json({
             ...trip._doc,
@@ -72,7 +73,7 @@ exports.drive = async (req, res) => {
       baseDuration,
       baseDistance,
     } = req.body;
-    const tripObj = new Trip({
+    const trip = new Trip({
       driver: _id,
       source: src,
       destination: dst,
@@ -82,7 +83,7 @@ exports.drive = async (req, res) => {
       baseDuration: baseDuration,
       baseDistance: baseDistance,
     });
-    tripObj.save((err, trip) => {
+    trip.save((err, trip) => {
       if (err) {
         console.log(`error`, err);
         return res
@@ -169,7 +170,7 @@ exports.ride = (req, res) => {
                   departureTime: new Date(trip.dateTime), // for the time N milliseconds from now.
                 },
                 optimize: true,
-                key: "AIzaSyCCZcb_AEAcCRk0uxe-GjAtUU_ewjpDXIM",
+                key: "AIzaSyD8MSGXG-7y2nXRtE90sv2IeLCElO2e3i0",
               },
               timeout: 2000, // milliseconds
             })
@@ -177,7 +178,7 @@ exports.ride = (req, res) => {
               const routeArray = polylineUtil.decode(
                 r.data.routes[0].overview_polyline.points
               );
-              trip.route = Object.values(routeArray).map((item) => ({
+              trip.route = ect.values(routeArray).map((item) => ({
                 lat: item[0],
                 lng: item[1],
               }));
@@ -244,7 +245,7 @@ exports.cancelTrip = (req, res) => {
             });
             trip.deleteOne((err) => {
               // if (err) {
-              //     res.statusMessage = "Error in deleting trip object";
+              //     res.statusMessage = "Error in deleting trip ect";
               //     return res.status(500).end();
               // }
             });
@@ -261,7 +262,7 @@ exports.cancelTrip = (req, res) => {
                     departureTime: new Date(trip.dateTime), // for the time N milliseconds from now.
                   },
                   optimize: true,
-                  key: "AIzaSyCCZcb_AEAcCRk0uxe-GjAtUU_ewjpDXIM",
+                  key: "AIzaSyD8MSGXG-7y2nXRtE90sv2IeLCElO2e3i0",
                 },
                 timeout: 2000, // milliseconds
               })
@@ -269,7 +270,7 @@ exports.cancelTrip = (req, res) => {
                 const routeArray = polylineUtil.decode(
                   r.data.routes[0].overview_polyline.points
                 );
-                trip.route = Object.values(routeArray).map((item) => ({
+                trip.route = ect.values(routeArray).map((item) => ({
                   lat: item[0],
                   lng: item[1],
                 }));
@@ -280,6 +281,7 @@ exports.cancelTrip = (req, res) => {
                 });
               })
               .catch((e) => {
+                console.log(e.response)
                 res.statusMessage = e.response.data.error_message;
                 return res.status(400).end();
               });
@@ -374,10 +376,12 @@ exports.tripDone = (req, res) => {
 
 exports.isDriver = (req, res) => {
   User.findById(req.auth._id, (err, user) => {
-    if (user.trip_role_driver == undefined || user.trip_role_driver == null) {
+    if (user.trip_role_driver === undefined || user.trip_role_driver === null) {
       res.statusMessage = "No active trip";
       return res.status(400).end();
-    } else res.status(200).json({ isdriver: user.trip_role_driver });
+    } else {
+      res.status(200).json({ isdriver: user.trip_role_driver });
+    }
   });
 };
 
@@ -397,17 +401,22 @@ exports.trips = async (req, res) => {
       },
     ],
     (err, trips) => {
-      var tripsResponse = [];
-      trips.forEach((trip) => {
-        if (req.body.getAll || trip.riders.length < trip.max_riders) {
-          var tripResponse = {
-            ...trip,
-          };
-          tripResponse["driverDetails"] = trip.driverDetails[0];
+      console.log(`Trips Response From Trips`, trips[0].riders.length);
+      console.log(`Driver Response From Trips`, trips[0].driverDetails[0]);
 
-          tripsResponse.push(tripResponse);
-        }
-      });
+      let tripsResponse = trips
+        .filter((trip) => trip.riders.length < trip.max_riders)
+        .map((trip) => {
+          console.log(trip.riders.length);
+
+          // Include driverDetails as a single ect if it exists
+          if (trip.driverDetails && trip.driverDetails.length) {
+            trip.driverDetails = trip.driverDetails[0];
+          }
+
+          return trip;
+        });
+      console.log("Filtered Trips", tripsResponse);
       return res.status(200).json({ trips: tripsResponse });
     }
   );
@@ -415,7 +424,7 @@ exports.trips = async (req, res) => {
 
 exports.requestRide = (req, res) => {
   Trip.findById(req.body.trip, (err, tripData) => {
-    const tripRequestObj = new TripRequest({
+    const tripRequest = new TripRequest({
       rider: req.auth._id,
       driver: req.body.driver,
       source: tripData.source,
@@ -426,7 +435,7 @@ exports.requestRide = (req, res) => {
       driverName: req.body.driverName,
       pickUpTime: req.body.pickUpTime ? new Date(req.body.pickUpTime) : null,
     });
-    tripRequestObj.save((err, tripRequest) => {
+    tripRequest.save((err, tripRequest) => {
       console.log(req.body.riderName);
       if (err) {
         console.log(err);
@@ -490,7 +499,13 @@ exports.rideRequests = (req, res) => {
 
 exports.updateRequest = (req, res) => {
   const action = req.body.action || "accepted";
-
+  User.findByIdAndUpdate(req.auth._id, {
+    $set: { active_trip: req.body.trip },
+  });
+  User.findByIdAndUpdate(req.body.rider, {
+    $set: { active_trip: req.body.trip },
+  });
+  
   // Find the trip request by ID
   TripRequest.findById(req.body.tripRequest, (err, tripRequest) => {
     if (err || !tripRequest) {
@@ -500,7 +515,7 @@ exports.updateRequest = (req, res) => {
     // Update the trip request state
     tripRequest.state = action;
     tripRequest.save((err, tr) => {
-      if (err) { 
+      if (err) {
         return res.status(500).json({ msg: "Error saving trip request" });
       }
 
@@ -518,7 +533,7 @@ exports.updateRequest = (req, res) => {
 
         // Handle trip acceptance
         if (action === "accepted") {
-          trip.riders.push(tripRequest.riders);
+          trip.riders.push(tripRequest.rider);
           trip.waypoints.push(tripRequest.source, tripRequest.destination);
           trip.save((err, trip) => {
             if (err) {

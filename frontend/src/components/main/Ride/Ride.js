@@ -89,7 +89,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
   };
 
   function driverCheck(trip) {
-    return trip.driverDetails != null;
+    return trip.driverDetails !== null;
   }
 
   const handleCallback = (closeButtonClicked, mapType, mapData) => {
@@ -274,7 +274,6 @@ export default function Ride({ setToken, setActiveTrip, name }) {
         dst: mapCoords.dst,
         pickUpTime: calculationData.pickUpDateTime,
         riderName: name,
-        driverName: driver.name,
       }),
     })
       .then((response) => {
@@ -319,7 +318,6 @@ export default function Ride({ setToken, setActiveTrip, name }) {
       {redirect ? <Navigate to="/ride-request" /> : <></>}
       {finding ? (
         <>
-          {/* <div style={{ width: '100%', height: '100%', textAlign: 'center' }}> */}
           <Container fluid="lg">
             <Row style={{ marginTop: "3rem" }}>
               <Col md>
@@ -447,9 +445,9 @@ export default function Ride({ setToken, setActiveTrip, name }) {
             handleCallback={handleCallback}
           />
         </>
-      ) : trips && trips !== "null" && trips !== "undefined" ? (
+      ) : trips && trips !== null && trips !== undefined ? (
         <>
-        <ResponseDisplay responseMessage={responseMessage} />
+          <ResponseDisplay responseMessage={responseMessage} />
           <Container fluid="lg">
             <Row style={{ marginTop: "3rem" }}>
               <Col md>
@@ -502,7 +500,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
                     )}
                   </GoogleMap>
                   {driver.map((r) => {
-                    // console.log(r);
+                    console.log("r", r);
                     return (
                       <Container fluid="lg">
                         <Row>

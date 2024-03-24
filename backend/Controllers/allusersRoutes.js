@@ -29,6 +29,7 @@ const updateUserDetailsVehicles = async (req, res) => {
       VehicleModel,
       VehicleSeats,
       VehicleYear,
+      VehicleLicensePlate,
     } = req.body;
 
     const missingFields = [];
@@ -39,6 +40,7 @@ const updateUserDetailsVehicles = async (req, res) => {
       "VehicleModel",
       "VehicleSeats",
       "VehicleYear",
+      "VehicleLicensePlate"
     ];
 
     for (const field of requiredFields) {
@@ -63,6 +65,7 @@ const updateUserDetailsVehicles = async (req, res) => {
             VehicleModel,
             VehicleSeats,
             VehicleYear,
+            VehicleLicensePlate
           },
         },
         {
