@@ -118,7 +118,6 @@ const isSignedIn = (req, res, next) => {
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
       (err, decodestring) => {
         if (err) {
-          console.log(`err`, err);
           res.statusMessage = "User authentication expired";
           return res.status(401).end();
         } else {
@@ -132,18 +131,6 @@ const isSignedIn = (req, res, next) => {
     return res.status(401).end();
   }
 };
-
-// const isAuthenticated = (req, res, next) => {
-//     let check = req.profile && req.auth && req.profile._id == req.auth._id;
-//     //console.log(req.profile._id)
-//     //console.log(req.auth)
-//     if (!check) {
-//         return res.status(400).json({
-//             error: "Access denied......"
-//         })
-//     }
-//     next()
-// }
 
 module.exports = {
   isSignedIn,

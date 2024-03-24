@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   DirectionsRenderer,
   DirectionsService,
@@ -41,6 +42,8 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
   const [dateTime, setDateTime] = useState(
     new Date(new Date().getTime() + 60 * 60 * 1000)
   );
+  const id = localStorage.getItem("id");
+  const navigate = useNavigate();
   const [mapCoords, setMapCoords] = useState({
     src: null,
     dst: null,
@@ -51,8 +54,6 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
 
   const [srcName, setsrcName] = useState("");
   const [destName, setdestName] = useState("");
-
-  const navigate = useNavigate();
   const [rideRouteResp, setRideRouteResp] = useState({ reload: false });
   const [rideTrip, setRideTrip] = useState();
 
@@ -108,7 +109,6 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
 
   const directionsCallback = (response) => {
     if (response !== null) {
-      console.log(`directionsCallback`, response);
       if (response.status === "OK") setRouteResp(response);
       else
         setResponseMessage(
@@ -143,7 +143,6 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
         travelMode: "DRIVING",
       })
       .then((result) => {
-        console.log(result);
         if (
           result &&
           result.rows &&
@@ -214,21 +213,19 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
       .then((response) => {
         if (response.ok) return response.json();
         else if (response.status === 401) setToken(null);
-        throw new Error(response.statusText);
+        setResponseMessage(`${response.statusText}`);
       })
       .then((responseJson) => {
-        console.log(`USER DETAILs`, responseJson.user);
         setRider([responseJson.user]);
       })
       .catch((error) => {
         console.log(error);
-        alert(error);
+        setResponseMessage(`Error: ${error}`);
         // window.location.reload();
       });
   };
 
   const handleRideAction = (action) => (e) => {
-    console.log("This is the ride trip before hiitting accept", rideTrip);
     fetch(`${url}/update/request/`, {
       method: "POST",
       headers: {
@@ -241,10 +238,10 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
         tripRequest: rideTrip._id,
         trip: rideTrip.trip,
         rider: rideTrip.rider,
+        driver: rideTrip.driver,
       }),
     })
       .then((response) => {
-        console.log(response);
         if (response.ok) return response.json();
         else if (response.status === 401) setToken(null);
         else setResponseMessage("Error: An Error Occurred!");
@@ -261,7 +258,6 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
       });
   };
   const getWaypoints = (trip) => {
-    //console.log(`trip`, trip)
     let waypoints = [];
     trip.pickUpPoints.forEach((p) =>
       waypoints.push({ location: p, stopover: true })
@@ -281,13 +277,11 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
       }),
     })
       .then((response) => {
-        // console.log(`response`, response)
         if (response.ok) {
           return response.json();
         }
       })
       .then((responseJson) => {
-        console.log("Drive Requests", responseJson);
         setRideRequests({
           rides: [...responseJson.rideRequests],
           loading: false,

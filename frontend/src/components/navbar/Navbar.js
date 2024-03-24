@@ -8,7 +8,7 @@ import { IconContext } from "react-icons";
 import { Button } from "react-bootstrap";
 import "./Navbar.css";
 import { SidebarData } from "./SidebarData";
-import logo from '../../logo192.png'
+import logo from "../../logo192.png";
 import url from "../../env";
 
 export default function Navbar({ setToken, activeTrip, name }) {
@@ -31,8 +31,7 @@ export default function Navbar({ setToken, activeTrip, name }) {
 
   const handleLogOut = async (e) => {
     e.preventDefault();
-    const data = await logoutUser();
-    console.log(data);
+    await logoutUser();
     window.location.reload();
   };
 
@@ -127,7 +126,7 @@ export default function Navbar({ setToken, activeTrip, name }) {
               </li>
               <li className="nav-text">
                 <Link to="/profile">
-                  <MdIcons.MdPerson color="white" size={24}/>
+                  <MdIcons.MdPerson color="white" size={24} />
                   <span style={{ marginLeft: "1rem" }}>{name}</span>
                 </Link>
               </li>

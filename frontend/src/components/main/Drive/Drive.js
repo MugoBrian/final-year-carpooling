@@ -7,12 +7,15 @@ import {
   Form,
   Row,
 } from "react-bootstrap";
+import axios from "axios";
 import MapSelector from "../MapSelector";
 import {
   DirectionsRenderer,
   DirectionsService,
   GoogleMap,
 } from "@react-google-maps/api";
+import { useNavigate } from "react-router-dom";
+
 import DatePicker from "react-datepicker";
 import "./Drive.css";
 import "react-datepicker/dist/react-datepicker.css";
@@ -68,12 +71,30 @@ export default function Drive({ setToken, setActiveTrip }) {
   const [redirect, setRedirect] = useState(false);
   const [driveMessage, setDriveMessage] = useState("");
 
+  const id = localStorage.getItem("id");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    axios.get(`${url}/user/details?userId=${id}`).then((res) => {
+      if (
+        res.data.user.VehicleLicensePlate === null ||
+        res.data.user.VehicleLicensePlate === ""
+      ) {
+        setDriveMessage(
+          "Error: Update Your Vehicle Details To Schedule A Drive. Redirecting..."
+        );
+        setTimeout(() => {
+          return navigate("/profile");
+        }, 2000);
+      }
+    });
+  }, [id, navigate]);
+
   const mapRef = useRef();
   const onMapLoad = (map) => {
     mapRef.current = map;
   };
 
-  
   const openMapModal = (mapType) => {
     setMapType(mapType);
     setModalTitle(mapType === "src" ? "Start" : "Destination");
@@ -124,7 +145,6 @@ export default function Drive({ setToken, setActiveTrip }) {
 
   const handleDriveSubmit = async (event) => {
     event.preventDefault();
-    console.log(routeResp.routes[0]);
     setData({
       src: {
         lat: mapCoords.src.lat,
@@ -138,7 +158,7 @@ export default function Drive({ setToken, setActiveTrip }) {
       dateTime: dateTime,
       max_riders: riders,
     });
-    
+
     if (data.src.lat === data.dst.lat && data.src.lng === data.dst.lng) {
       setDriveMessage(
         "Error: Start Location cannot be the same as Destination Location!"

@@ -22,39 +22,39 @@ exports.activeTrip = (req, res) => {
     if (user.active_trip == undefined || user.active_trip == null) {
       res.statusMessage = "No active trip";
       return res.status(400).end();
-    }
-    Trip.findById(user.active_trip, (err, trip) => {
-      console.log(trip);
-      User.findById(trip.driver, (err, user_driver) => {
-        const riders = trip.riders;
-        console.log(user_driver);
-        if (riders.length === 0) {
-          res.status(200).json({
-            ...trip._doc,
-            riders: riderArray,
-            driver: user_driver.name + " " + user_driver.lastname,
-          });
-        }
+    } else {
+      Trip.findById(user.active_trip, (err, trip) => {
+        User.findById(trip.driver, (err, user_driver) => {
+          const riders = trip.riders;
 
-        var i = 0;
-        riders.forEach((rider) => {
-          User.findById(rider, (err, user_rider) => {
-            if (err) return res.status(500).end();
-            riderArray.push(
-              String(user_rider.name + " " + user_rider.lastname)
-            );
-            i++;
-            if (i == riders.length) {
-              return res.status(200).json({
-                ...trip._doc,
-                riders: riderArray,
-                driver: user_driver.name + " " + user_driver.lastname,
-              });
-            }
+          if (riders.length === 0) {
+            res.status(200).json({
+              ...trip._doc,
+              riders: riderArray,
+              driver: user_driver.name + " " + user_driver.lastname,
+            });
+          }
+
+          var i = 0;
+          riders.forEach((rider) => {
+            User.findById(rider, (err, user_rider) => {
+              if (err) return res.status(500).end();
+              riderArray.push(
+                String(user_rider.name + " " + user_rider.lastname)
+              );
+              i++;
+              if (i == riders.length) {
+                return res.status(200).json({
+                  ...trip._doc,
+                  riders: riderArray,
+                  driver: user_driver.name + " " + user_driver.lastname,
+                });
+              }
+            });
           });
         });
       });
-    });
+    }
   });
 };
 
@@ -85,7 +85,6 @@ exports.drive = async (req, res) => {
     });
     trip.save((err, trip) => {
       if (err) {
-        console.log(`error`, err);
         return res
           .status(500)
           .json({ message: "Error: An issue encountered" })
@@ -281,7 +280,6 @@ exports.cancelTrip = (req, res) => {
                 });
               })
               .catch((e) => {
-                console.log(e.response)
                 res.statusMessage = e.response.data.error_message;
                 return res.status(400).end();
               });
@@ -376,12 +374,7 @@ exports.tripDone = (req, res) => {
 
 exports.isDriver = (req, res) => {
   User.findById(req.auth._id, (err, user) => {
-    if (user.trip_role_driver === undefined || user.trip_role_driver === null) {
-      res.statusMessage = "No active trip";
-      return res.status(400).end();
-    } else {
-      res.status(200).json({ isdriver: user.trip_role_driver });
-    }
+    res.status(200).json({ isdriver: user.trip_role_driver });
   });
 };
 
@@ -401,14 +394,9 @@ exports.trips = async (req, res) => {
       },
     ],
     (err, trips) => {
-      console.log(`Trips Response From Trips`, trips[0].riders.length);
-      console.log(`Driver Response From Trips`, trips[0].driverDetails[0]);
-
       let tripsResponse = trips
         .filter((trip) => trip.riders.length < trip.max_riders)
         .map((trip) => {
-          console.log(trip.riders.length);
-
           // Include driverDetails as a single ect if it exists
           if (trip.driverDetails && trip.driverDetails.length) {
             trip.driverDetails = trip.driverDetails[0];
@@ -416,7 +404,6 @@ exports.trips = async (req, res) => {
 
           return trip;
         });
-      console.log("Filtered Trips", tripsResponse);
       return res.status(200).json({ trips: tripsResponse });
     }
   );
@@ -436,9 +423,7 @@ exports.requestRide = (req, res) => {
       pickUpTime: req.body.pickUpTime ? new Date(req.body.pickUpTime) : null,
     });
     tripRequest.save((err, tripRequest) => {
-      console.log(req.body.riderName);
       if (err) {
-        console.log(err);
         return res.status(500).end();
       }
       return res.status(200).json(tripRequest);
@@ -491,21 +476,23 @@ exports.rideRequests = (req, res) => {
           rideRequests.push(requestDto);
         }
       });
-      console.log(rideRequests);
       return res.status(200).json({ rideRequests });
     }
   );
 };
 
-exports.updateRequest = (req, res) => {
+exports.updateRequest = async (req, res) => {
   const action = req.body.action || "accepted";
-  User.findByIdAndUpdate(req.auth._id, {
+
+  // Update the user's active_trip to the current trip
+  await User.findByIdAndUpdate(req.auth._id, {
     $set: { active_trip: req.body.trip },
   });
-  User.findByIdAndUpdate(req.body.rider, {
+
+  // Update the rider's active_trip to the current trip
+  await User.findByIdAndUpdate(req.body.driver, {
     $set: { active_trip: req.body.trip },
   });
-  
   // Find the trip request by ID
   TripRequest.findById(req.body.tripRequest, (err, tripRequest) => {
     if (err || !tripRequest) {

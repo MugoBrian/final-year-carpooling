@@ -159,14 +159,11 @@ export default function Ride({ setToken, setActiveTrip, name }) {
         throw new Error(response.statusText);
       })
       .then((responseJson) => {
-        console.log(responseJson.trips);
         setTrips(responseJson.trips.filter(driverCheck));
         setRideTrip(responseJson.trips ? responseJson.trips[0] : {});
         setFinding(false);
-        console.log(trips);
       })
       .catch((error) => {
-        console.log(error);
         setResponseMessage(`Error: An Error Has Occurred!`);
         // window.location.reload();
       });
@@ -188,7 +185,6 @@ export default function Ride({ setToken, setActiveTrip, name }) {
         travelMode: "DRIVING",
       })
       .then((result) => {
-        console.log(result);
         if (
           result &&
           result.rows &&
@@ -258,12 +254,10 @@ export default function Ride({ setToken, setActiveTrip, name }) {
   };
 
   const handleRideRequest = (driver) => (e) => {
-    // console.log(`handleRequestRide`, driver);
     fetch(`${url}/trip/request`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // 'Authorization': 'Bearer ' + Cookies.get('tokken'),  //another working solution
         Coookie: Cookies.get("tokken"),
       },
       body: JSON.stringify({
@@ -279,16 +273,11 @@ export default function Ride({ setToken, setActiveTrip, name }) {
       .then((response) => {
         if (response.ok) return response.json();
         else if (response.status === 401) setToken(null);
-        throw new Error(response.statusText);
+        setResponseMessage(`Error: ${response.statusText}`);
       })
       .then((responseJson) => {
         setResponseMessage("You request has been submitted successfully");
         setRedirect(true);
-      })
-      .catch((error) => {
-        // console.log(error);
-        setResponseMessage(`Error: An Error Has Occurred!`);
-        // window.location.reload();
       });
   };
 
@@ -500,7 +489,6 @@ export default function Ride({ setToken, setActiveTrip, name }) {
                     )}
                   </GoogleMap>
                   {driver.map((r) => {
-                    console.log("r", r);
                     return (
                       <Container fluid="lg">
                         <Row>
@@ -552,7 +540,6 @@ export default function Ride({ setToken, setActiveTrip, name }) {
                             style={{ marginTop: "1rem" }}
                             variant="outline-info"
                             onClick={handleRideRequest(r)}
-                            // onClick={console.log(r)}
                           >
                             Request Ride
                           </Button>

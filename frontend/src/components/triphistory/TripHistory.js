@@ -6,7 +6,7 @@ import groupImg from "../../group.svg";
 import "./TripHistory.css";
 import Cookies from "js-cookie";
 import Geocode from "react-geocode";
-import url from '../../env'
+import url from "../../env";
 
 export default function TripHistory() {
   const getLocFromCoords = async (coords) => {
@@ -28,18 +28,14 @@ export default function TripHistory() {
 
   const [tripDetails, setTripDetails] = useState([]);
   const fetchData = async () => {
-    const response = await fetch(
-      `${url}/trip/history`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Coookie: Cookies.get("tokken"),
-        },
-      }
-    );
+    const response = await fetch(`${url}/trip/history`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Coookie: Cookies.get("tokken"),
+      },
+    });
     const data = await response.json();
-    console.log(data)
 
     // Parse Data
     let tempArray = [];

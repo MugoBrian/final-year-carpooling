@@ -41,7 +41,6 @@ const corsOpts = {
 var db = mongoose
   .connect(process.env.MONGO_URI)
   .then(console.log("DB connected"));
-//.catch(error => console.log(error));
 
 //Middleware
 app.use(bodyparser.json());
