@@ -73,7 +73,6 @@ export default function Drive({ setToken, setActiveTrip }) {
     mapRef.current = map;
   };
 
-  
   const openMapModal = (mapType) => {
     setMapType(mapType);
     setModalTitle(mapType === "src" ? "Start" : "Destination");
@@ -118,13 +117,13 @@ export default function Drive({ setToken, setActiveTrip }) {
   const directionsCallback = (drive) => {
     if (drive !== null) {
       if (drive.status === "OK") setRouteResp(drive);
-      else alert("Problem fetching directions");
-    } else alert("Problem fetching directions");
+      else setDriveMessage("Problem fetching directions");
+    } else setDriveMessage("Problem fetching directions");
   };
 
   const handleDriveSubmit = async (event) => {
     event.preventDefault();
-    console.log(routeResp.routes[0]);
+
     setData({
       src: {
         lat: mapCoords.src.lat,
@@ -138,34 +137,28 @@ export default function Drive({ setToken, setActiveTrip }) {
       dateTime: dateTime,
       max_riders: riders,
     });
-    
-    if (data.src.lat === data.dst.lat && data.src.lng === data.dst.lng) {
-      setDriveMessage(
-        "Error: Start Location cannot be the same as Destination Location!"
-      );
-    } else {
-      return fetch(`${url}/trip/drive`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // 'Authorization': 'Bearer ' + Cookies.get('tokken'),  //another working solution
-          Coookie: Cookies.get("tokken"),
-        },
-        body: JSON.stringify(data),
-      }).then((drive) => {
-        if (drive.ok) {
-          setDriveMessage("Your drive is scheduled!");
-          setTimeout(() => {
-            setRedirect(true);
-          }, 1000);
-          return drive.json();
-        } else if (drive.status === 401) {
-          setToken(null);
-        } else {
-          setDriveMessage(drive.data.message);
-        }
-      });
-    }
+
+    return fetch(`${url}/trip/drive`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+
+        Coookie: Cookies.get("tokken"),
+      },
+      body: JSON.stringify(data),
+    }).then((drive) => {
+      if (drive.ok) {
+        setDriveMessage("Your drive is scheduled!");
+        setTimeout(() => {
+          setRedirect(true);
+        }, 1000);
+        return drive.json();
+      } else if (drive.status === 401) {
+        setToken(null);
+      } else {
+        setDriveMessage(drive.data.message);
+      }
+    });
   };
 
   useEffect(() => {

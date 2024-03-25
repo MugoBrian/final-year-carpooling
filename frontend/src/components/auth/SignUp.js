@@ -32,7 +32,7 @@ export default function SignUp({ setToken }) {
         return responseJson;
       })
       .catch((error) => {
-        alert(error);
+        console.log(error);
       });
   };
   const handleSubmit = async (e) => {

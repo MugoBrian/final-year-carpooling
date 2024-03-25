@@ -26,21 +26,10 @@ export default function Profile() {
   const [vmodel, setvModel] = useState();
   const [vyear, setvYear] = useState();
   const [vLicensePlate, setvLicensePlate] = useState();
-  const userDefaultDetails = {
-    address: "Kisii, Kenya",
-    mobile: "+254712345698",
-  };
+
+  const [address, setAddress] = useState();
   const id = localStorage.getItem("id");
-  // var isadmin =
-  //   localStorage.getItem("isadmin") === 1 ? (
-  //     <MDBBtn>
-  //       <Link className="text-reset fw-bold" to="/admin">
-  //         User Details
-  //       </Link>
-  //     </MDBBtn>
-  //   ) : (
-  //     <></>
-  //   );
+  const API_KEY = "AIzaSyD8MSGXG-7y2nXRtE90sv2IeLCElO2e3i0";
 
   useEffect(() => {
     axios.get(`${url}/user/details?userId=${id}`).then((res) => {
@@ -48,8 +37,65 @@ export default function Profile() {
       if (res.data.user.VehicleName != null) {
         setIsVehicle(true);
       }
+      console.log(res.data.user);
     });
   }, [id, isVehicle]);
+
+  // Get and update location
+  useEffect(() => {
+    const getUserLocationAndUpdateAddress = async () => {
+      if ("geolocation" in navigator) {
+        const options = {
+          enableHighAccuracy: true, // Request high accuracy for the position
+          timeout: 5000, // Maximum time allowed to try obtaining the location
+          maximumAge: 0, // Indicates not to use a cached position and to try to get a fresh one
+        };
+
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+            try {
+              const addr = await fetchAddress(latitude, longitude);
+              setAddress(addr); // Update local state with the fetched address
+            } catch (error) {
+              console.error("Failed to fetch address:", error);
+            }
+          },
+          (error) => {
+            console.error(
+              "Geolocation permission denied or error occurred:",
+              error
+            );
+            setResponseMessage(
+              "Error: Geolocation permission denied or error occurred!"
+            );
+          },
+          options // Pass the options object here
+        );
+      } else {
+        console.error("Geolocation is not supported by this browser.");
+        setResponseMessage(
+          "Error: Geolocation is not supported by this browser."
+        );
+      }
+    };
+
+    getUserLocationAndUpdateAddress();
+  }, []);
+
+  const fetchAddress = async (lat, lng) => {
+    const response = await axios.get(
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${API_KEY}`
+    );
+    if (
+      response.data &&
+      response.data.results &&
+      response.data.results.length > 0
+    ) {
+      return response.data.results[0].formatted_address; // This is your address
+    }
+    setResponseMessage("Error: Address not found");
+  };
 
   function setVehicleDetails() {
     const updateUser = {
@@ -167,7 +213,9 @@ export default function Profile() {
                   fluid
                 />
                 <p className="text-muted mb-1">User</p>
-                <p className="text-muted mb-4">{userDefaultDetails.address}</p>
+                <p className="text-muted mb-4">
+                  {address ? address : "Kisii, Kenya"}
+                </p>
               </MDBCardBody>
             </MDBCard>
           </MDBCol>
@@ -213,9 +261,7 @@ export default function Profile() {
                   </MDBCol>
                   <MDBCol sm="9">
                     <MDBCardText className="text-muted">
-                      {user.phone_number
-                        ? user.phone_number
-                        : userDefaultDetails.mobile}
+                      {user.phone_number}
                     </MDBCardText>
                   </MDBCol>
                 </MDBRow>
@@ -226,7 +272,7 @@ export default function Profile() {
                   </MDBCol>
                   <MDBCol sm="9">
                     <MDBCardText className="text-muted">
-                      {userDefaultDetails.address}
+                      {address ? address : "Kisii, Kenya"}
                     </MDBCardText>
                   </MDBCol>
                 </MDBRow>

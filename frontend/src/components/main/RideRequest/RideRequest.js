@@ -131,7 +131,7 @@ export default function RideRequest({ setToken, setActiveTrip }) {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        // 'Authorization': 'Bearer ' + Cookies.get('tokken'),  //another working solution
+
         Coookie: Cookies.get("tokken"),
       },
     })
@@ -145,7 +145,7 @@ export default function RideRequest({ setToken, setActiveTrip }) {
         setDriver([responseJson.user]);
       })
       .catch((error) => {
-        alert(error);
+        console.log(error);
         // window.location.reload();
       });
   };

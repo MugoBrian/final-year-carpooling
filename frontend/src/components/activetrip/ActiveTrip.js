@@ -116,7 +116,7 @@ export default function ActiveTrip({ setActiveTrip }) {
         }
       })
       .catch((error) => {
-        alert(error);
+        console.error(error);
       });
   }, []);
 
@@ -143,7 +143,6 @@ export default function ActiveTrip({ setActiveTrip }) {
       })
       .catch((error) => {
         console.log(error);
-        alert(error);
       });
   };
 
@@ -161,7 +160,7 @@ export default function ActiveTrip({ setActiveTrip }) {
       .then((response) => {
         if (response.ok) {
           setActiveTrip(null);
-          alert("Trip marked completed");
+          setResponseMessage("Trip marked completed");
           window.location.reload();
           return;
         }
@@ -169,7 +168,6 @@ export default function ActiveTrip({ setActiveTrip }) {
       })
       .catch((error) => {
         console.log(error);
-        alert(error);
       });
   };
 
@@ -216,7 +214,7 @@ export default function ActiveTrip({ setActiveTrip }) {
         setMapCoords(mapCoords);
       })
       .catch((error) => {
-        alert(error);
+        console.log(error);
       });
   }, []);
 
@@ -278,7 +276,6 @@ export default function ActiveTrip({ setActiveTrip }) {
           </Col>
           <Col md="4">
             <Row style={{ marginTop: "1rem" }}>
-              
               {isDriver ? (
                 <Button
                   variant="primary"

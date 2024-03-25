@@ -81,7 +81,7 @@ export default function TripHistory() {
       <div className="detail-container">
         <div className="detail-row">
           <img className="tripImage" src={destinationImg}></img>
-          <h6 className="detail-heading">Destiation: </h6>
+          <h6 className="detail-heading">Destination: </h6>
           <h6 className="detail-heading">{destination}</h6>
         </div>
       </div>

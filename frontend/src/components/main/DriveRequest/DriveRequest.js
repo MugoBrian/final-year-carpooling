@@ -38,9 +38,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
   const [mapType, setMapType] = useState();
   const [modalTitle, setModalTitle] = useState("Title Error");
   const [routeResp, setRouteResp] = useState();
-  const [dateTime, setDateTime] = useState(
-    new Date(new Date().getTime() + 60 * 60 * 1000)
-  );
+
   const [mapCoords, setMapCoords] = useState({
     src: null,
     dst: null,
@@ -168,12 +166,6 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
           let fare =
             (originalDistance * baseKmRate) / 1000 +
             (oldDuration * baseMinRate) / 60;
-          let addFare =
-            ((newDistance - originalDistance) * baseKmRate) / 1000 +
-            ((newDuration - oldDuration) * baseMinRate) / 60;
-          if (addFare <= 0) {
-            addFare = 1;
-          }
           let newDurationMin = parseInt(newDuration / 60);
           let newDurationSec = (newDuration % 60).toFixed(0);
           setCalculationData({
@@ -182,7 +174,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
             newDistance,
             newDuration,
             fare,
-            addFare,
+
             newDurationMin,
             newDurationSec,
           });
@@ -194,7 +186,6 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
   };
 
   const handleRideClick = (trip) => (e) => {
-    // console.log(`ride`, trip)
     setRideTrip(trip);
     setRideRouteResp({ ...rideRouteResp, reload: true });
     updateCalculation(
@@ -208,23 +199,19 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        // 'Authorization': 'Bearer ' + Cookies.get('tokken'),  //another working solution
         Coookie: Cookies.get("tokken"),
       },
     })
       .then((response) => {
         if (response.ok) return response.json();
         else if (response.status === 401) setToken(null);
-        throw new Error(response.statusText);
+        setResponseMessage("Error", response.statusText);
       })
       .then((responseJson) => {
-        console.log(`USER DETAILs`, responseJson.user);
         setRider([responseJson.user]);
       })
       .catch((error) => {
         console.log(error);
-        alert(error);
-        // window.location.reload();
       });
   };
 
@@ -233,7 +220,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // 'Authorization': 'Bearer ' + Cookies.get('tokken'),  //another working solution
+
         Coookie: Cookies.get("tokken"),
       },
       body: JSON.stringify({ action, tripRequest: rideTrip._id }),
@@ -242,8 +229,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
         console.log(response);
         if (response.ok) return response.json();
         else if (response.status === 401) setToken(null);
-        else setResponseMessage('An Error Occurred!')
-        throw new Error(response.statusText);
+        else setResponseMessage("An Error Occurred!", response.statusText);
       })
       .then((responseJson) => {
         setResponseMessage(responseJson.msg);
@@ -251,7 +237,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
       })
       .catch((error) => {
         console.log(error);
-        setResponseMessage('Error: An Error Occurred!')
+        setResponseMessage("Error: An Error Occurred!");
         // window.location.reload();
       });
   };
@@ -276,7 +262,6 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
       }),
     })
       .then((response) => {
-        // console.log(`response`, response)
         if (response.ok) {
           return response.json();
         }
@@ -422,12 +407,6 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
                                   <b>Base Fare:</b>{" "}
                                   {"Ksh." +
                                     calculationData.fare?.toFixed(1) * ksh ||
-                                    ""}
-                                </div>
-                                <div>
-                                  <b>Additional Fare:</b>{" "}
-                                  {"Ksh." +
-                                    calculationData.addFare?.toFixed(1) * ksh ||
                                     ""}
                                 </div>
                               </>

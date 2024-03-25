@@ -148,7 +148,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // 'Authorization': 'Bearer ' + Cookies.get('tokken'),  //another working solution
+
         Coookie: Cookies.get("tokken"),
       },
       body: JSON.stringify(data),
@@ -239,7 +239,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        // 'Authorization': 'Bearer ' + Cookies.get('tokken'),  //another working solution
+
         Coookie: Cookies.get("tokken"),
       },
     })
@@ -263,7 +263,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // 'Authorization': 'Bearer ' + Cookies.get('tokken'),  //another working solution
+
         Coookie: Cookies.get("tokken"),
       },
       body: JSON.stringify({
@@ -449,7 +449,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
         </>
       ) : trips && trips !== "null" && trips !== "undefined" ? (
         <>
-        <ResponseDisplay responseMessage={responseMessage} />
+          <ResponseDisplay responseMessage={responseMessage} />
           <Container fluid="lg">
             <Row style={{ marginTop: "3rem" }}>
               <Col md>
