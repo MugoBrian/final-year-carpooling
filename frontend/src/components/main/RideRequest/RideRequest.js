@@ -89,21 +89,7 @@ export default function RideRequest({ setToken, setActiveTrip }) {
       }
     );
   };
-  useEffect(() => {
-    axios.get(`${url}/user/details?userId=${id}`).then((res) => {
-      if (
-        res.data.user.VehicleLicensePlate === null ||
-        res.data.user.VehicleLicensePlate === ""
-      ) {
-        setResponseMessage(
-          "Error: Update Your Vehicle Details To Schedule A Drive. Redirecting..."
-        );
-        setTimeout(() => {
-          return navigate("/profile");
-        }, 2000);
-      }
-    });
-  }, [id, navigate]);
+ 
 
   const handleCallback = (closeButtonClicked, mapType, mapData) => {
     setShowModal(false);
@@ -163,7 +149,7 @@ export default function RideRequest({ setToken, setActiveTrip }) {
       })
       .catch((error) => {
         console.log(error);
-        // window.location.reload();
+       
       });
   };
 

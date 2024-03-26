@@ -27,6 +27,8 @@ export default function Admin() {
       .then((result) => {
         if (result.status === 200) {
           setRefresh(true);
+          console.log(result);
+          window.location.reload();
         }
       });
   }
@@ -75,9 +77,6 @@ export default function Admin() {
               </td>
 
               <td>
-                <MDBBtn color="info" className="me-1" rounded size="sm">
-                  Edit
-                </MDBBtn>
                 <MDBBtn
                   color="danger"
                   className="me-1"

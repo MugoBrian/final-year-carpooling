@@ -15,6 +15,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import axios from "axios";
 import url from "../../env";
+import { useNavigate } from "react-router-dom";
 
 export default function Profile() {
   const [user, setUser] = useState({});
@@ -30,14 +31,15 @@ export default function Profile() {
   const [address, setAddress] = useState();
   const id = localStorage.getItem("id");
   const API_KEY = "AIzaSyD8MSGXG-7y2nXRtE90sv2IeLCElO2e3i0";
-
+  const navigate = useNavigate;
   useEffect(() => {
     axios.get(`${url}/user/details?userId=${id}`).then((res) => {
+      console.log(res);
+      if (!res.data.user) return navigate("/login");
       setUser(res.data.user);
       if (res.data.user.VehicleName != null) {
         setIsVehicle(true);
       }
-      console.log(res.data.user);
     });
   }, [id, isVehicle]);
 

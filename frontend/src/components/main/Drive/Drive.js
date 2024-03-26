@@ -76,19 +76,25 @@ export default function Drive({ setToken, setActiveTrip }) {
 
   useEffect(() => {
     axios.get(`${url}/user/details?userId=${id}`).then((res) => {
-      if (
-        res.data.user.VehicleLicensePlate === null ||
-        res.data.user.VehicleLicensePlate === ""
-      ) {
-        setDriveMessage(
-          "Error: Update Your Vehicle Details To Schedule A Drive. Redirecting..."
-        );
-        setTimeout(() => {
-          return navigate("/profile");
-        }, 2000);
+      console.log(res.data);
+      if (res.data.user === null) {
+        setDriveMessage("Access Denied!");
+        navigate("/login");
+      } else {
+        if (
+          res.data.user.VehicleLicensePlate === null ||
+          res.data.user.VehicleLicensePlate === ""
+        ) {
+          setDriveMessage(
+            "Error: Update Your Vehicle Details To Schedule A Drive. Redirecting..."
+          );
+          setTimeout(() => {
+            return navigate("/profile");
+          }, 2000);
+        }
       }
     });
-  }, [id, navigate]);
+  }, [id,navigate]);
 
   const mapRef = useRef();
   const onMapLoad = (map) => {

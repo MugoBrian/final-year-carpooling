@@ -20,6 +20,11 @@ export const SidebarData = [
     path: "/trip-history",
     icon: <BsIcons.BsCardChecklist color="white" />,
   },
+  {
+    title: "Contact Us",
+    path: "/contactus",
+    icon: <MdIcons.MdPermPhoneMsg color="white" />,
+  },
 ];
 
 if (localStorage.getItem("isadmin") === 1) {

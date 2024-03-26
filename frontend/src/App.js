@@ -23,6 +23,7 @@ import DriveRequest from "./components/main/DriveRequest/DriveRequest";
 import UseActiveTrip from "./libraries/UseActiveTrip";
 import Profile from "./components/profile/Profile";
 import Admin from "./components/admin/Admin";
+import Contactus from "./components/contactus/Contactus";
 const libraries = ["places"];
 
 function App() {
@@ -132,6 +133,11 @@ function App() {
           exact
           path="/trip-history"
           element={token ? <TripHistory /> : <Navigate to="/login" />}
+        />
+        <Route
+          exact
+          path="/contactus"
+          element={token ? <Contactus /> : <Navigate to="/login" />}
         />
         <Route
           exact

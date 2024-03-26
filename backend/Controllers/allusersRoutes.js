@@ -14,7 +14,7 @@ const allusersRoutes = (req, res) => {
 const userDetails = (req, res) => {
   req.query.userId = req.query.userId ? req.query.userId : req.auth._id;
   User.findById(req.query.userId, (err, user) => {
-    if (err) return res.status(500).end();
+    if (err) return res.status(404).json({ message: "User Not Found!" }).end();
     return res.status(200).json({ user });
   });
 };

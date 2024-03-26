@@ -1,21 +1,25 @@
-const User = require("../Models/user.js")
+const User = require("../Models/user.js");
 
-exports.deleteuserbyid = (req,res) => {
-    User.findByIdAndDelete(req.body.id)
+exports.deleteuserbyid = (req, res) => {
+  User.findByIdAndDelete(req.query.id)
     .then((deletedUser) => {
-        console.log(`Deleted user: ${deletedUser}`);
+      return res.send(`Deleted user: ${deletedUser}`);
     })
     .catch((error) => {
-    console.log(`Error deleting user: ${error}`);
+      return res.send(`Error deleting user: ${error}`).status(400);
     });
-}
+};
 
-exports.deleteuserbyname_email = (req,res) => {
-    User.findOneAndDelete({"name":req.body.name,"lastname":req.body.lastname,"email":req.body.email})
+exports.deleteuserbyname_email = (req, res) => {
+  User.findOneAndDelete({
+    name: req.body.name,
+    lastname: req.body.lastname,
+    email: req.body.email,
+  })
     .then((deletedUser) => {
-        res.send(`Deleted user: ${deletedUser}`)
+      res.send(`Deleted user: ${deletedUser}`);
     })
-    .catch((error)=>{
-        res.send(`Error deleting user: ${error}`)
-    })
-}
+    .catch((error) => {
+      res.send(`Error deleting user: ${error}`);
+    });
+};

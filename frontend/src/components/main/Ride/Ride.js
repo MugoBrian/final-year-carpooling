@@ -170,13 +170,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
   };
 
   const updateCalculation = (s1, s2, d1, d2, trip) => {
-    // updateCalculation(
-    //   trip.source,
-    //   trip.destination,
-    //   mapCoords.src,
-    //   mapCoords.dst,
-    //   trip
-    // );
+    
     const service = new window.google.maps.DistanceMatrixService();
     service
       .getDistanceMatrix({
