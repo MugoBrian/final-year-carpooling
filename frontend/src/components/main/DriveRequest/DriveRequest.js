@@ -158,7 +158,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
             result.rows[0].elements[0].duration.value +
             result.rows[1].elements[1].duration.value +
             result.rows[2].elements[2].duration.value;
-          let originalDistance = result.rows[0].elements[2].duration.value;
+          let originalDistance = result.rows[0].elements[2].distance.value;
           let newDistance =
             result.rows[0].elements[0].distance.value +
             result.rows[1].elements[1].distance.value +
@@ -247,7 +247,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
         console.log(error);
         setResponseMessage("Error: An Error Occurred!");
         setResponseMessage("Error: An Error Occurred!");
-        // window.location.reload();
+        
       });
   };
   const getWaypoints = (trip) => {

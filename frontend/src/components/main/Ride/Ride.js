@@ -186,6 +186,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
           result.rows[0].elements &&
           result.rows[0].elements.length > 0
         ) {
+          console.log(result)
           var pickUpDuration = result.rows[0].elements[0].duration.value;
           var destinationDuration =
             result.rows[0].elements[0].distance.value +
@@ -195,6 +196,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
           var destinationDateTime = new Date(
             date.getTime() + destinationDuration * 1000
           );
+          
           var pickUpLocation = result.originAddresses[1];
           var dropOffLocation = result.destinationAddresses[0];
 

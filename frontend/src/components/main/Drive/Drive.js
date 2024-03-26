@@ -81,8 +81,9 @@ export default function Drive({ setToken, setActiveTrip }) {
         setDriveMessage("Access Denied!");
         navigate("/login");
       } else {
+        console.log(res.data.user.VehicleLicensePlate)
         if (
-          res.data.user.VehicleLicensePlate === null ||
+          res.data.user.VehicleLicensePlate === null || res.data.user.VehicleLicensePlate === undefined ||
           res.data.user.VehicleLicensePlate === ""
         ) {
           setDriveMessage(
@@ -275,7 +276,7 @@ export default function Drive({ setToken, setActiveTrip }) {
                 <Col sm="7" md="12" xl="8">
                   <FloatingLabel
                     controlId="ridingWith"
-                    label="Select number of people can ride with"
+                    label="Select the number of people you can ride with"
                   >
                     <Form.Select
                       required
@@ -288,9 +289,6 @@ export default function Drive({ setToken, setActiveTrip }) {
                       <option value="2">Two</option>
                       <option value="3">Three</option>
                       <option value="4">Four</option>
-                      <option value="5">Five</option>
-                      <option value="6">Six</option>
-                      <option value="7">Seven</option>
                     </Form.Select>
                   </FloatingLabel>
                 </Col>

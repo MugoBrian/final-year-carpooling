@@ -55,7 +55,12 @@ const updateUserDetailsVehicles = async (req, res) => {
         ", "
       )}`;
       return res.status(400).send({ message });
-    } else {
+    }
+    else if(VehicleSeats < 1 || VehicleSeats > 4){
+      const message = `Error: Vehicle Seats should be a minimum of 1 and a max of 4`;
+      return res.status(400).send({ message });
+    }
+     else {
       // Update user document
       const updatedUser = await User.findByIdAndUpdate(
         userId,

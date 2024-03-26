@@ -65,11 +65,8 @@ export default function Profile() {
           },
           (error) => {
             console.error(
-              "Geolocation permission denied or error occurred:",
+              "Geolocation permission denied:",
               error
-            );
-            setResponseMessage(
-              "Error: Geolocation permission denied or error occurred!"
             );
           },
           options // Pass the options object here
@@ -167,6 +164,8 @@ export default function Profile() {
       type="number"
       required={true}
       id="vehicleseat"
+      min={1}
+      max={4}
       value={vseat}
       onChange={(e) => {
         setvSeat(e.target.value);
@@ -214,7 +213,7 @@ export default function Profile() {
                   style={{ width: "150px" }}
                   fluid
                 />
-                <p className="text-muted mb-1">User</p>
+                <p className="text-muted mb-1">Welcome, {user.name}</p>
                 <p className="text-muted mb-4">
                   {address ? address : "Kisii, Kenya"}
                 </p>
