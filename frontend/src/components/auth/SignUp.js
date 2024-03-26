@@ -99,6 +99,7 @@ export default function SignUp({ setToken }) {
           <Form.Group size="lg" controlId="email">
             <Form.Label>Email</Form.Label>
             <Form.Control
+              required={true}
               autoFocus
               data-test="email-form-control"
               type="email"
