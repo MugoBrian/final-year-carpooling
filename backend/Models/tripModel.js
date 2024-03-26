@@ -1,53 +1,58 @@
 const mongoose = require("mongoose");
 const schema = mongoose.Schema;
-const tripSchema = new schema({
+const tripSchema = new schema(
+  {
     driver: {
-        type: mongoose.ObjectId,
-        require: true,
-    },    
+      type: mongoose.ObjectId,
+      require: true,
+    },
     source: {
-        type: Object,
-        required: true,
+      type: Object,
+      required: true,
     },
     destination: {
-        type: Object,
-        required: true,
+      type: Object,
+      required: true,
     },
     route: {
-        type: Array
+      type: Array,
     },
     waypoints: {
-        type: Array,
-        default: []
+      type: Array,
+      default: [],
     },
     dateTime: {
-        type: Date,
-        required: true,
+      type: Date,
+      required: true,
     },
     max_riders: {
-        type: Number,
-        required: true,
+      type: Number,
+      required: true,
     },
     available_riders: {
-        type: Boolean,
-        required: false,
+      type: Number,
+      required: false,
+      default: 0,
     },
     riders: {
-        type: Array,
-        default: []
+      type: Array,
+      default: [],
     },
     baseDuration: {
-        type: Number,
-        required: false,
+      type: Number,
+      required: false,
     },
     baseDistance: {
-        type: Number,
-        required: false,
+      type: Number,
+      required: false,
     },
-    completed: {    // false: active
-        type: Boolean,
-        default: false
+    completed: {
+      // false: active
+      type: Boolean,
+      default: false,
     },
-}, { timestamps: true });
+  },
+  { timestamps: true }
+);
 
-module.exports = mongoose.model("trip", tripSchema)
+module.exports = mongoose.model("trip", tripSchema);

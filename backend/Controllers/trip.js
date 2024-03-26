@@ -411,23 +411,60 @@ exports.trips = async (req, res) => {
 
 exports.requestRide = (req, res) => {
   Trip.findById(req.body.trip, (err, tripData) => {
-    const tripRequest = new TripRequest({
-      rider: req.auth._id,
-      driver: req.body.driver,
-      source: tripData.source,
-      destination: tripData.destination,
-      trip: req.body.trip,
-      pickUpPoints: [...tripData.waypoints, req.body.src, req.body.dst],
-      riderName: req.body.riderName,
-      driverName: req.body.driverName,
-      pickUpTime: req.body.pickUpTime ? new Date(req.body.pickUpTime) : null,
-    });
-    tripRequest.save((err, tripRequest) => {
-      if (err) {
-        return res.status(500).end();
+    if (err) {
+      return res.status(500).json({ message: "Error finding trip" });
+    }
+
+    if (!tripData) {
+      return res.status(404).json({ message: "Trip not found" });
+    }
+
+    // Increment available_riders by 1
+    Trip.findByIdAndUpdate(
+      req.body.trip,
+      { $inc: { available_riders: 1 } },
+      { new: true }, // Return the updated document
+      (err, updatedTripData) => {
+        console.log(
+          updatedTripData.max_riders < updatedTripData.available_riders
+        );
+        if (err) {
+          return res.status(500).json({ message: "Error updating trip" });
+        }
+
+        if (updatedTripData.max_riders < updatedTripData.available_riders) {
+          // If max_riders is less than available_riders after the update, then trip is already full
+          return res
+            .status(500)
+            .json({ message: "Trip is already full" })
+            .end();
+        }
+
+        const tripRequest = new TripRequest({
+          rider: req.auth._id,
+          driver: req.body.driver,
+          source: tripData.source,
+          destination: tripData.destination,
+          trip: req.body.trip,
+          pickUpPoints: [...tripData.waypoints, req.body.src, req.body.dst],
+          riderName: req.body.riderName,
+          driverName: req.body.driverName,
+          pickUpTime: req.body.pickUpTime
+            ? new Date(req.body.pickUpTime)
+            : null,
+          passengers_booked: updatedTripData.available_riders, // Use updated available_riders
+        });
+
+        tripRequest.save((err, savedTripRequest) => {
+          if (err) {
+            return res
+              .status(500)
+              .json({ message: "Error saving trip request" });
+          }
+          return res.status(200).json(savedTripRequest);
+        });
       }
-      return res.status(200).json(tripRequest);
-    });
+    );
   });
 };
 

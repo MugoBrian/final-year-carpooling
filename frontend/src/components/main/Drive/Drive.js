@@ -43,6 +43,7 @@ export default function Drive({ setToken, setActiveTrip }) {
   const [showModal, setShowModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("Title Error");
   const [mapType, setMapType] = useState();
+  const [userVehicleSeat, setUserVehicleSeat] = useState(null);
   const [mapCoords, setMapCoords] = useState({
     src: null,
     dst: null,
@@ -81,9 +82,10 @@ export default function Drive({ setToken, setActiveTrip }) {
         setDriveMessage("Access Denied!");
         navigate("/login");
       } else {
-        console.log(res.data.user.VehicleLicensePlate)
+        console.log(res.data.user.VehicleLicensePlate);
         if (
-          res.data.user.VehicleLicensePlate === null || res.data.user.VehicleLicensePlate === undefined ||
+          res.data.user.VehicleLicensePlate === null ||
+          res.data.user.VehicleLicensePlate === undefined ||
           res.data.user.VehicleLicensePlate === ""
         ) {
           setDriveMessage(
@@ -92,10 +94,12 @@ export default function Drive({ setToken, setActiveTrip }) {
           setTimeout(() => {
             return navigate("/profile");
           }, 2000);
+        } else {
+          setUserVehicleSeat(res.data.user.VehicleSeats);
         }
       }
     });
-  }, [id,navigate]);
+  }, [id, navigate]);
 
   const mapRef = useRef();
   const onMapLoad = (map) => {
@@ -192,7 +196,14 @@ export default function Drive({ setToken, setActiveTrip }) {
   useEffect(() => {
     setRouteResp(null);
   }, [mapCoords]);
-
+  const items = [];
+  if (userVehicleSeat) {
+    for (let i = 0; i < userVehicleSeat; i++) {
+      // Pushing JSX elements to the items array
+      items.push(<option value={i + 1}>{i + 1}</option>);
+    }
+  }
+  console.log(userVehicleSeat);
   return (
     <>
       {redirect ? <Navigate to="/ride-request" /> : <></>}
@@ -285,10 +296,7 @@ export default function Drive({ setToken, setActiveTrip }) {
                       }}
                     >
                       <option>----- Select -----</option>
-                      <option value="1">One</option>
-                      <option value="2">Two</option>
-                      <option value="3">Three</option>
-                      <option value="4">Four</option>
+                      {userVehicleSeat && items}
                     </Form.Select>
                   </FloatingLabel>
                 </Col>

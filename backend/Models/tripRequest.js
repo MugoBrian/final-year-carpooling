@@ -42,6 +42,11 @@ const tripRequestSchema = new schema(
       type: String,
       default: "pending",
     },
+    passengers_booked: {
+      type: Number,
+      require: true,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

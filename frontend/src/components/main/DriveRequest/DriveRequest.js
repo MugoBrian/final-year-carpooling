@@ -237,7 +237,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
       .then((response) => {
         if (response.ok) return response.json();
         else if (response.status === 401) setToken(null);
-        else setResponseMessage("An Error Occurred!", response.statusText);
+        else setResponseMessage("Error", response.data.message);
       })
       .then((responseJson) => {
         setResponseMessage(responseJson.msg);
@@ -247,7 +247,6 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
         console.log(error);
         setResponseMessage("Error: An Error Occurred!");
         setResponseMessage("Error: An Error Occurred!");
-        
       });
   };
   const getWaypoints = (trip) => {
@@ -378,6 +377,7 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
                 </Row>
                 <Row>
                   {rider.map((r) => {
+                    console.log(rideTrip);
                     return (
                       <Container fluid="lg">
                         <Row>
@@ -415,6 +415,10 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
                                   {"Ksh." +
                                     calculationData.fare?.toFixed(1) * ksh ||
                                     ""}
+                                </div>
+                                <div>
+                                  <b>Passengers Booked:</b>{" "}
+                                  {rideTrip.passengers_booked}
                                 </div>
                               </>
                             )}

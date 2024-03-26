@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import axios from "axios";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import MapSelector from "../MapSelector";
 import {
@@ -170,7 +171,6 @@ export default function Ride({ setToken, setActiveTrip, name }) {
   };
 
   const updateCalculation = (s1, s2, d1, d2, trip) => {
-    
     const service = new window.google.maps.DistanceMatrixService();
     service
       .getDistanceMatrix({
@@ -186,7 +186,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
           result.rows[0].elements &&
           result.rows[0].elements.length > 0
         ) {
-          console.log(result)
+          console.log(result);
           var pickUpDuration = result.rows[0].elements[0].duration.value;
           var destinationDuration =
             result.rows[0].elements[0].distance.value +
@@ -196,7 +196,7 @@ export default function Ride({ setToken, setActiveTrip, name }) {
           var destinationDateTime = new Date(
             date.getTime() + destinationDuration * 1000
           );
-          
+
           var pickUpLocation = result.originAddresses[1];
           var dropOffLocation = result.destinationAddresses[0];
 
@@ -249,32 +249,49 @@ export default function Ride({ setToken, setActiveTrip, name }) {
       });
   };
 
-  const handleRideRequest = (driver) => (e) => {
-    fetch(`${url}/trip/request`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Coookie: Cookies.get("tokken"),
-      },
-      body: JSON.stringify({
-        driver: driver._id,
-        driverName: driver.name,
-        trip: rideTrip._id,
-        src: mapCoords.src,
-        dst: mapCoords.dst,
-        pickUpTime: calculationData.pickUpDateTime,
-        riderName: name,
-      }),
-    })
-      .then((response) => {
-        if (response.ok) return response.json();
-        else if (response.status === 401) setToken(null);
-        setResponseMessage(`Error: ${response.statusText}`);
-      })
-      .then((responseJson) => {
-        setResponseMessage("You request has been submitted successfully");
+  const handleRideRequest = (driver) => async (e) => {
+    try {
+      const response = await axios.post(
+        `${url}/trip/request`,
+        {
+          driver: driver._id,
+          driverName: driver.name,
+          trip: rideTrip._id,
+          src: mapCoords.src,
+          dst: mapCoords.dst,
+          pickUpTime: calculationData.pickUpDateTime,
+          riderName: name,
+          // available_riders: passengerBooked,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Coookie: Cookies.get("tokken"),
+          },
+        }
+      );
+      console.log("Response", response);
+      setRedirect(false);
+      if (response.status === 200) {
+        setResponseMessage("Your request has been submitted successfully");
         setRedirect(true);
-      });
+      } else if (response.status === 401) {
+        setToken(null);
+      } else if (response.status === 500) {
+        // Trip already full error
+        setResponseMessage("Error: Trip Already Full!");
+        setRedirect(false);
+      } else {
+        // Handle other errors here
+        setResponseMessage("Error: Something went wrong!");
+        setRedirect(false);
+      }
+    } catch (error) {
+      // Handle network or other errors
+      console.error("Error:", error.response.data.message);
+      setResponseMessage(`Error ${error.response.data.message}`);
+      setRedirect(false);
+    }
   };
 
   const getWaypoints = (trip) => {
@@ -529,6 +546,10 @@ export default function Ride({ setToken, setActiveTrip, name }) {
                                 <div>
                                   <b>Your Travelling Distance:</b>{" "}
                                   {calculationData.distance / 100 + " km" || ""}
+                                </div>
+                                <div>
+                                  <b>Maximum number of Passengers:</b>{" "}
+                                  {rideTrip.max_riders || ""}
                                 </div>
                               </>
                             )}
