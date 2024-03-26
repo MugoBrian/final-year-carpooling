@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   DirectionsRenderer,
   DirectionsService,
@@ -38,7 +39,11 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
   const [mapType, setMapType] = useState();
   const [modalTitle, setModalTitle] = useState("Title Error");
   const [routeResp, setRouteResp] = useState();
-
+  const [dateTime, setDateTime] = useState(
+    new Date(new Date().getTime() + 60 * 60 * 1000)
+  );
+  const id = localStorage.getItem("id");
+  const navigate = useNavigate();
   const [mapCoords, setMapCoords] = useState({
     src: null,
     dst: null,
@@ -49,8 +54,6 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
 
   const [srcName, setsrcName] = useState("");
   const [destName, setdestName] = useState("");
-
-  const navigate = useNavigate();
   const [rideRouteResp, setRideRouteResp] = useState({ reload: false });
   const [rideTrip, setRideTrip] = useState();
 
@@ -106,7 +109,6 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
 
   const directionsCallback = (response) => {
     if (response !== null) {
-      console.log(`directionsCallback`, response);
       if (response.status === "OK") setRouteResp(response);
       else
         setResponseMessage(
@@ -141,7 +143,6 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
         travelMode: "DRIVING",
       })
       .then((result) => {
-        console.log(result);
         if (
           result &&
           result.rows &&
@@ -212,6 +213,8 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
       })
       .catch((error) => {
         console.log(error);
+        setResponseMessage(`Error: ${error}`);
+        // window.location.reload();
       });
   };
 
@@ -223,10 +226,15 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
 
         Coookie: Cookies.get("tokken"),
       },
-      body: JSON.stringify({ action, tripRequest: rideTrip._id }),
+      body: JSON.stringify({
+        action,
+        tripRequest: rideTrip._id,
+        trip: rideTrip.trip,
+        rider: rideTrip.rider,
+        driver: rideTrip.driver,
+      }),
     })
       .then((response) => {
-        console.log(response);
         if (response.ok) return response.json();
         else if (response.status === 401) setToken(null);
         else setResponseMessage("An Error Occurred!", response.statusText);
@@ -238,11 +246,11 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
       .catch((error) => {
         console.log(error);
         setResponseMessage("Error: An Error Occurred!");
+        setResponseMessage("Error: An Error Occurred!");
         // window.location.reload();
       });
   };
   const getWaypoints = (trip) => {
-    //console.log(`trip`, trip)
     let waypoints = [];
     trip.pickUpPoints.forEach((p) =>
       waypoints.push({ location: p, stopover: true })
@@ -267,7 +275,6 @@ export default function DriveRequest({ setToken, setActiveTrip }) {
         }
       })
       .then((responseJson) => {
-        console.log("Drive Requests", responseJson);
         setRideRequests({
           rides: [...responseJson.rideRequests],
           loading: false,
